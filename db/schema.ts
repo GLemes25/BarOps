@@ -65,3 +65,13 @@ export const eventMaterials = pgTable("event_materials", {
   quantity: integer("quantity").notNull(),
   costPerUnit: decimal("cost_per_unit", { precision: 10, scale: 2 }).notNull(),
 });
+
+export const eventDrinks = pgTable("event_drinks", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id")
+    .notNull()
+    .references(() => events.id),
+  drinkId: integer("drink_id")
+    .notNull()
+    .references(() => drinks.id),
+});
