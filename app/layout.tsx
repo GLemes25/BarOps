@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono, Roboto_Slab } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono, Roboto_Slab, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const robotoSlabHeading = Roboto_Slab({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -34,14 +36,13 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={cn(
-        "h-full",
-        "antialiased",
-        geistSans.variable,
-        geistMono.variable,
-        "font-mono",
-        jetbrainsMono.variable,
-        robotoSlabHeading.variable
-      )}
+              "h-full",
+              "antialiased",
+              geistSans.variable,
+              geistMono.variable,
+              jetbrainsMono.variable,
+              robotoSlabHeading.variable
+            , "font-sans", inter.variable)}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
