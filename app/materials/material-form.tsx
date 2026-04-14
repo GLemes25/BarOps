@@ -1,5 +1,6 @@
 "use client";
 
+import { createMaterial, updateMaterial } from "@/actions/material-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
@@ -30,11 +31,12 @@ type MaterialRecord = {
 };
 
 type MaterialFormProps = {
+  eventId?: number;
   record?: MaterialRecord | null;
   onSuccess: () => void;
 };
 
-export const MaterialForm = ({ record, onSuccess }: MaterialFormProps) => {
+export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) => {
   const form = useForm<MaterialFormValues>({
     resolver: zodResolver(materialSchema) as Resolver<MaterialFormValues>,
     defaultValues: {
@@ -46,8 +48,17 @@ export const MaterialForm = ({ record, onSuccess }: MaterialFormProps) => {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onSubmit = async (_values: MaterialFormValues) => {
-    onSuccess();
+  const onSubmit = async (values: MaterialFormValues) => {
+    try {
+      if (record?.id) {
+        await updateMaterial(record.id, values);
+      } else if (eventId !== undefined) {
+        await createMaterial(eventId, values);
+      }
+      onSuccess();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

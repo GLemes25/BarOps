@@ -1,5 +1,6 @@
 "use client";
 
+import { createEvent, updateEvent } from "@/actions/event-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
@@ -52,8 +53,17 @@ export const EventForm = ({ record, onSuccess }: EventFormProps) => {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onSubmit = async (_values: EventFormValues) => {
-    onSuccess();
+  const onSubmit = async (values: EventFormValues) => {
+    try {
+      if (record?.id) {
+        await updateEvent(record.id, values);
+      } else {
+        await createEvent(values);
+      }
+      onSuccess();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

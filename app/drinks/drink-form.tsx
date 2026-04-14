@@ -1,5 +1,6 @@
 "use client";
 
+import { createDrink, updateDrink } from "@/actions/drink-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -40,8 +41,17 @@ export const DrinkForm = ({ record, onSuccess }: DrinkFormProps) => {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onSubmit = async (_values: DrinkFormValues) => {
-    onSuccess();
+  const onSubmit = async (values: DrinkFormValues) => {
+    try {
+      if (record?.id) {
+        await updateDrink(record.id, values);
+      } else {
+        await createDrink(values);
+      }
+      onSuccess();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

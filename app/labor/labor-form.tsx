@@ -1,5 +1,6 @@
 "use client";
 
+import { createLabor, updateLabor } from "@/actions/labor-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
@@ -30,11 +31,12 @@ type LaborRecord = {
 };
 
 type LaborFormProps = {
+  eventId?: number;
   record?: LaborRecord | null;
   onSuccess: () => void;
 };
 
-export const LaborForm = ({ record, onSuccess }: LaborFormProps) => {
+export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
   const form = useForm<LaborFormValues>({
     resolver: zodResolver(laborSchema) as Resolver<LaborFormValues>,
     defaultValues: {
@@ -46,8 +48,17 @@ export const LaborForm = ({ record, onSuccess }: LaborFormProps) => {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onSubmit = async (_values: LaborFormValues) => {
-    onSuccess();
+  const onSubmit = async (values: LaborFormValues) => {
+    try {
+      if (record?.id) {
+        await updateLabor(record.id, values);
+      } else if (eventId !== undefined) {
+        await createLabor(eventId, values);
+      }
+      onSuccess();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

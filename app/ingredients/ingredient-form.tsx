@@ -1,8 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
-import { z } from "zod";
+import {
+  createIngredient,
+  updateIngredient,
+} from "@/actions/ingredient-actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,6 +14,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
 
 const ingredientSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -46,13 +50,25 @@ export const IngredientForm = ({ record, onSuccess }: IngredientFormProps) => {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onSubmit = async (_values: IngredientFormValues) => {
-    onSuccess();
+  const onSubmit = async (values: IngredientFormValues) => {
+    try {
+      if (record?.id) {
+        await updateIngredient(record.id, values);
+      } else {
+        await createIngredient(values);
+      }
+      onSuccess();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -96,7 +112,11 @@ export const IngredientForm = ({ record, onSuccess }: IngredientFormProps) => {
         />
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : record ? "Salvar alterações" : "Criar ingrediente"}
+          {isSubmitting
+            ? "Salvando..."
+            : record
+              ? "Salvar alterações"
+              : "Criar ingrediente"}
         </Button>
       </form>
     </Form>
