@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteDrink } from "@/actions/drink-actions";
-import { DrinkForm } from "@/app/drinks/drink-form";
+import { DrinkForm, type IngredientOption } from "@/app/drinks/drink-form";
 import { PageHeader } from "@/components/page-header";
 import { TableRowActions } from "@/components/table-row-actions";
 import {
@@ -24,15 +24,17 @@ import { useState } from "react";
 type DrinkRecord = {
   id: number;
   name: string;
+  ingredients: { id: number; name: string; quantity: number; unit: string }[];
 };
 
 type Props = {
   initialData: DrinkRecord[];
+  availableIngredients: IngredientOption[];
 };
 
-export function DrinksTable({ initialData }: Props) {
+export function DrinksTable({ initialData, availableIngredients }: Props) {
   const router = useRouter();
-  const [drinks, setDrinks] = useState<DrinkRecord[]>(initialData);
+  const [drinks] = useState<DrinkRecord[]>(initialData);
   const [selectedDrink, setSelectedDrink] = useState<DrinkRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -51,13 +53,16 @@ export function DrinksTable({ initialData }: Props) {
       <PageHeader
         title="Bebidas"
         dialogTitle="Nova Bebida"
-        dialogContent={(onClose) => <DrinkForm onSuccess={onClose} />}
+        dialogContent={(onClose) => (
+          <DrinkForm onSuccess={onClose} availableIngredients={availableIngredients} />
+        )}
       />
 
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
+            <TableHead>Receita</TableHead>
             <TableHead className="w-16">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -65,7 +70,7 @@ export function DrinksTable({ initialData }: Props) {
           {drinks.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={2}
+                colSpan={3}
                 className="text-center text-muted-foreground"
               >
                 Nenhuma bebida cadastrada.
@@ -75,6 +80,13 @@ export function DrinksTable({ initialData }: Props) {
             drinks.map((drink) => (
               <TableRow key={drink.id}>
                 <TableCell>{drink.name}</TableCell>
+                <TableCell>
+                  {drink.ingredients.length === 0
+                    ? "—"
+                    : drink.ingredients
+                        .map((ing) => `${ing.name} (${ing.quantity}${ing.unit})`)
+                        .join(", ")}
+                </TableCell>
                 <TableCell>
                   <TableRowActions
                     onEdit={() => handleEdit(drink)}
@@ -94,7 +106,11 @@ export function DrinksTable({ initialData }: Props) {
           </DialogHeader>
           <DrinkForm
             record={selectedDrink}
-            onSuccess={() => setIsEditOpen(false)}
+            onSuccess={() => {
+              setIsEditOpen(false);
+              router.refresh();
+            }}
+            availableIngredients={availableIngredients}
           />
         </DialogContent>
       </Dialog>

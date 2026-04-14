@@ -1,15 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  GlassWater,
-  FlaskConical,
-  Users,
-  Package,
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +11,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  CalendarDays,
+  FlaskConical,
+  GlassWater,
+  LayoutDashboard,
+  Package,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type NavItem = {
   label: string;
@@ -31,7 +31,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Eventos", href: "/events", icon: CalendarDays },
-  { label: "Bebidas", href: "/drinks", icon: GlassWater },
+  { label: "Drinks", href: "/drinks", icon: GlassWater },
   { label: "Ingredientes", href: "/ingredients", icon: FlaskConical },
   { label: "Mão de Obra", href: "/labor", icon: Users },
   { label: "Materiais", href: "/materials", icon: Package },

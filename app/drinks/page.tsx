@@ -1,10 +1,17 @@
 import { getDrinks } from "@/actions/drink-actions";
+import { getIngredients } from "@/actions/ingredient-actions";
 import { DrinksTable } from "./drinks-table";
 
 const DrinksPage = async () => {
-  const drinks = await getDrinks();
+  const [drinks, ingredients] = await Promise.all([getDrinks(), getIngredients()]);
 
-  return <DrinksTable initialData={drinks} />;
+  const availableIngredients = ingredients.map((ing) => ({
+    id: ing.id,
+    name: ing.name,
+    unit: ing.unit,
+  }));
+
+  return <DrinksTable initialData={drinks} availableIngredients={availableIngredients} />;
 };
 
 export default DrinksPage;

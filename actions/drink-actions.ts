@@ -1,17 +1,59 @@
 "use server";
 
 import { db } from "@/db";
-import { drinks } from "@/db/schema";
+import { drinks, drinkIngredients, ingredients } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "./types";
 
+type IngredientEntry = {
+  ingredientId: number;
+  quantity: number;
+};
+
 type DrinkInput = {
   name: string;
+  ingredients: IngredientEntry[];
 };
 
 export const getDrinks = async () => {
-  return db.select().from(drinks);
+  const rows = await db
+    .select({
+      id: drinks.id,
+      name: drinks.name,
+      ingredientId: drinkIngredients.ingredientId,
+      quantity: drinkIngredients.quantity,
+      ingredientName: ingredients.name,
+      unit: ingredients.unit,
+    })
+    .from(drinks)
+    .leftJoin(drinkIngredients, eq(drinkIngredients.drinkId, drinks.id))
+    .leftJoin(ingredients, eq(ingredients.id, drinkIngredients.ingredientId));
+
+  const drinkMap = new Map<
+    number,
+    {
+      id: number;
+      name: string;
+      ingredients: { id: number; name: string; quantity: number; unit: string }[];
+    }
+  >();
+
+  for (const row of rows) {
+    if (!drinkMap.has(row.id)) {
+      drinkMap.set(row.id, { id: row.id, name: row.name, ingredients: [] });
+    }
+    if (row.ingredientId && row.ingredientName && row.unit && row.quantity) {
+      drinkMap.get(row.id)!.ingredients.push({
+        id: row.ingredientId,
+        name: row.ingredientName,
+        quantity: Number(row.quantity),
+        unit: row.unit,
+      });
+    }
+  }
+
+  return Array.from(drinkMap.values());
 };
 
 export const deleteDrink = async (id: number): Promise<ActionResult> => {
@@ -28,11 +70,27 @@ export const createDrink = async (
   values: DrinkInput,
 ): Promise<ActionResult<{ id: number }>> => {
   try {
-    const [drink] = await db
-      .insert(drinks)
-      .values(values)
-      .returning({ id: drinks.id });
-    return { success: true, data: { id: drink.id } };
+    const result = await db.transaction(async (tx) => {
+      const [drink] = await tx
+        .insert(drinks)
+        .values({ name: values.name })
+        .returning({ id: drinks.id });
+
+      if (values.ingredients.length > 0) {
+        await tx.insert(drinkIngredients).values(
+          values.ingredients.map((ing) => ({
+            drinkId: drink.id,
+            ingredientId: ing.ingredientId,
+            quantity: String(ing.quantity),
+          })),
+        );
+      }
+
+      return drink;
+    });
+
+    revalidatePath("/drinks");
+    return { success: true, data: { id: result.id } };
   } catch (error) {
     return { success: false, error: String(error) };
   }
@@ -43,7 +101,22 @@ export const updateDrink = async (
   values: DrinkInput,
 ): Promise<ActionResult> => {
   try {
-    await db.update(drinks).set(values).where(eq(drinks.id, id));
+    await db.transaction(async (tx) => {
+      await tx.update(drinks).set({ name: values.name }).where(eq(drinks.id, id));
+      await tx.delete(drinkIngredients).where(eq(drinkIngredients.drinkId, id));
+
+      if (values.ingredients.length > 0) {
+        await tx.insert(drinkIngredients).values(
+          values.ingredients.map((ing) => ({
+            drinkId: id,
+            ingredientId: ing.ingredientId,
+            quantity: String(ing.quantity),
+          })),
+        );
+      }
+    });
+
+    revalidatePath("/drinks");
     return { success: true };
   } catch (error) {
     return { success: false, error: String(error) };
