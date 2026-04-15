@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -17,12 +18,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ShoppingCart } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   labor: EventLaborWithCatalog[];
   materials: EventMaterialWithCatalog[];
   shoppingList: ShoppingListItem[];
   durationHours: number;
+  eventId: number;
 };
 
 export function EventFinancialSection({
@@ -30,6 +34,7 @@ export function EventFinancialSection({
   materials,
   shoppingList,
   durationHours,
+  eventId,
 }: Props) {
   const formatCurrency = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -109,7 +114,18 @@ export function EventFinancialSection({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Ingredientes (Lista de Compras)</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-3">
+                <span>Ingredientes (Lista de Compras)</span>
+                <Link
+                  href={`/events/${eventId}/shopping-list`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  Ver Lista de Compras
+                </Link>
+              </div>
+            </TableCell>
             <TableCell className="text-right">
               {formatCurrency(ingredientsCost)}
             </TableCell>

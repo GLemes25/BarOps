@@ -12,7 +12,7 @@ import {
   laborCatalog,
   materialCatalog,
 } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "./types";
 
@@ -337,4 +337,119 @@ export const getEventReport = async (eventId: number): Promise<EventReport> => {
 
     return { totalCostDrinks, totalCostLabor, totalCostMaterials, grandTotal };
   });
+};
+
+export const addDrinkToEvent = async (
+  eventId: number,
+  drinkId: number,
+): Promise<ActionResult> => {
+  try {
+    await db.insert(eventDrinks).values({ eventId, drinkId });
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const removeDrinkFromEvent = async (
+  eventId: number,
+  drinkId: number,
+): Promise<ActionResult> => {
+  try {
+    await db
+      .delete(eventDrinks)
+      .where(
+        and(eq(eventDrinks.eventId, eventId), eq(eventDrinks.drinkId, drinkId)),
+      );
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const addLaborToEvent = async (
+  eventId: number,
+  laborCatalogId: number,
+  quantity: number,
+): Promise<ActionResult> => {
+  try {
+    await db.insert(eventLabor).values({ eventId, laborCatalogId, quantity });
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const updateEventLaborQuantity = async (
+  id: number,
+  quantity: number,
+  eventId: number,
+): Promise<ActionResult> => {
+  try {
+    await db.update(eventLabor).set({ quantity }).where(eq(eventLabor.id, id));
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const removeEventLabor = async (
+  id: number,
+  eventId: number,
+): Promise<ActionResult> => {
+  try {
+    await db.delete(eventLabor).where(eq(eventLabor.id, id));
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const addMaterialToEvent = async (
+  eventId: number,
+  materialCatalogId: number,
+  quantity: number,
+): Promise<ActionResult> => {
+  try {
+    await db.insert(eventMaterials).values({ eventId, materialCatalogId, quantity });
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const updateEventMaterialQuantity = async (
+  id: number,
+  quantity: number,
+  eventId: number,
+): Promise<ActionResult> => {
+  try {
+    await db
+      .update(eventMaterials)
+      .set({ quantity })
+      .where(eq(eventMaterials.id, id));
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
+export const removeEventMaterial = async (
+  id: number,
+  eventId: number,
+): Promise<ActionResult> => {
+  try {
+    await db.delete(eventMaterials).where(eq(eventMaterials.id, id));
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
 };

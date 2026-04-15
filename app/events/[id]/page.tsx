@@ -3,6 +3,9 @@ import {
   getEventShoppingList,
 } from "@/actions/event-actions";
 import { getEventById } from "@/actions/get-event-by-id";
+import { getDrinks } from "@/actions/drink-actions";
+import { getLabor } from "@/actions/labor-actions";
+import { getMaterials } from "@/actions/material-actions";
 import { Badge } from "@/components/ui/badge";
 import {
   Tabs,
@@ -30,11 +33,15 @@ const EventDetailPage = async ({ params }: Props) => {
 
   if (isNaN(eventId)) notFound();
 
-  const [eventResult, eventDrinks, shoppingList] = await Promise.all([
-    getEventById(eventId),
-    getEventDrinks(eventId),
-    getEventShoppingList(eventId),
-  ]);
+  const [eventResult, eventDrinks, shoppingList, drinksCatalog, laborCatalog, materialsCatalog] =
+    await Promise.all([
+      getEventById(eventId),
+      getEventDrinks(eventId),
+      getEventShoppingList(eventId),
+      getDrinks(),
+      getLabor(),
+      getMaterials(),
+    ]);
 
   if (!eventResult.success || !eventResult.data) notFound();
 
@@ -67,6 +74,8 @@ const EventDetailPage = async ({ params }: Props) => {
           <EventDrinksSection
             drinks={eventDrinks}
             totalDrinks={event.totalDrinks}
+            eventId={eventId}
+            availableDrinks={drinksCatalog.map((d) => ({ id: d.id, name: d.name }))}
           />
         </TabsContent>
 
@@ -74,11 +83,17 @@ const EventDetailPage = async ({ params }: Props) => {
           <EventLaborSection
             labor={event.labor}
             durationHours={event.durationHours}
+            eventId={eventId}
+            availableLabor={laborCatalog.map((l) => ({ id: l.id, role: l.role }))}
           />
         </TabsContent>
 
         <TabsContent value="materiais" className="mt-4">
-          <EventMaterialsSection materials={event.materials} />
+          <EventMaterialsSection
+            materials={event.materials}
+            eventId={eventId}
+            availableMaterials={materialsCatalog.map((m) => ({ id: m.id, name: m.name }))}
+          />
         </TabsContent>
 
         <TabsContent value="financeiro" className="mt-4">
@@ -87,6 +102,7 @@ const EventDetailPage = async ({ params }: Props) => {
             materials={event.materials}
             shoppingList={shoppingList}
             durationHours={event.durationHours}
+            eventId={eventId}
           />
         </TabsContent>
       </Tabs>
