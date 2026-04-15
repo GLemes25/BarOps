@@ -17,8 +17,9 @@ import { z } from "zod";
 
 const laborSchema = z.object({
   role: z.string().min(1, "Função é obrigatória"),
-  quantity: z.coerce.number().int().positive("Deve ser positivo"),
-  costPerPerson: z.coerce.number().positive("Deve ser positivo"),
+  baseCost: z.coerce.number().positive("Deve ser positivo"),
+  baseHours: z.coerce.number().int().positive("Deve ser positivo"),
+  extraHourCost: z.coerce.number().min(0, "Deve ser zero ou positivo"),
 });
 
 type LaborFormValues = z.infer<typeof laborSchema>;
@@ -26,23 +27,24 @@ type LaborFormValues = z.infer<typeof laborSchema>;
 type LaborRecord = {
   id: number;
   role: string;
-  quantity: number;
-  costPerPerson: number;
+  baseCost: number;
+  baseHours: number;
+  extraHourCost: number;
 };
 
 type LaborFormProps = {
-  eventId?: number;
   record?: LaborRecord | null;
   onSuccess: () => void;
 };
 
-export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
+export const LaborForm = ({ record, onSuccess }: LaborFormProps) => {
   const form = useForm<LaborFormValues>({
     resolver: zodResolver(laborSchema) as Resolver<LaborFormValues>,
     defaultValues: {
       role: record?.role ?? "",
-      quantity: record?.quantity ?? 1,
-      costPerPerson: record?.costPerPerson ?? 0,
+      baseCost: record?.baseCost ?? 0,
+      baseHours: record?.baseHours ?? 1,
+      extraHourCost: record?.extraHourCost ?? 0,
     },
   });
 
@@ -50,16 +52,10 @@ export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
 
   const onSubmit = async (values: LaborFormValues) => {
     try {
-      console.log("record?.id " + record?.id);
-      console.log("eventId " + eventId);
-
       if (record?.id) {
-        console.log("up");
         await updateLabor(record.id, values);
-      } else if (eventId !== undefined) {
-        console.log("cr");
-
-        await createLabor(eventId, values);
+      } else {
+        await createLabor(values);
       }
       onSuccess();
     } catch (error) {
@@ -89,10 +85,24 @@ export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
 
         <FormField
           control={form.control}
-          name="quantity"
+          name="baseCost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Quantidade</FormLabel>
+              <FormLabel>Custo base (R$)</FormLabel>
+              <FormControl>
+                <Input type="number" min={0} step={0.01} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="baseHours"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horas base</FormLabel>
               <FormControl>
                 <Input type="number" min={1} {...field} />
               </FormControl>
@@ -103,10 +113,10 @@ export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
 
         <FormField
           control={form.control}
-          name="costPerPerson"
+          name="extraHourCost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Custo por pessoa (R$)</FormLabel>
+              <FormLabel>Custo hora extra (R$)</FormLabel>
               <FormControl>
                 <Input type="number" min={0} step={0.01} {...field} />
               </FormControl>

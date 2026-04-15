@@ -24,8 +24,7 @@ import { useEffect, useState } from "react";
 type MaterialRecord = {
   id: number;
   name: string;
-  quantity: number;
-  costPerUnit: number;
+  defaultCost: number;
 };
 
 type Props = {
@@ -64,8 +63,7 @@ export function MaterialsTable({ initialData }: Props) {
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Quantidade</TableHead>
-            <TableHead>Custo/Unidade</TableHead>
+            <TableHead>Valor Unitário</TableHead>
             <TableHead className="w-16">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -73,7 +71,7 @@ export function MaterialsTable({ initialData }: Props) {
           {materials.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={4}
+                colSpan={3}
                 className="text-center text-muted-foreground"
               >
                 Nenhum material cadastrado.
@@ -83,9 +81,8 @@ export function MaterialsTable({ initialData }: Props) {
             materials.map((material) => (
               <TableRow key={material.id}>
                 <TableCell>{material.name}</TableCell>
-                <TableCell>{material.quantity}</TableCell>
                 <TableCell>
-                  {material.costPerUnit.toLocaleString("pt-BR", {
+                  {material.defaultCost.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   })}

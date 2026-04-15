@@ -45,17 +45,29 @@ export const drinkIngredients = pgTable("drink_ingredients", {
   quantity: decimal("quantity", { precision: 10, scale: 4 }).notNull(),
 });
 
+export const laborCatalog = pgTable("labor_catalog", {
+  id: serial("id").primaryKey(),
+  role: text("role").notNull(),
+  baseCost: decimal("base_cost", { precision: 10, scale: 2 }).notNull(),
+  baseHours: integer("base_hours").notNull(),
+  extraHourCost: decimal("extra_hour_cost", { precision: 10, scale: 2 }).notNull(),
+});
+
+export const materialCatalog = pgTable("material_catalog", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  defaultCost: decimal("default_cost", { precision: 10, scale: 2 }).notNull(),
+});
+
 export const eventLabor = pgTable("event_labor", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id")
     .notNull()
     .references(() => events.id),
-  role: text("role").notNull(),
+  laborCatalogId: integer("labor_catalog_id")
+    .notNull()
+    .references(() => laborCatalog.id),
   quantity: integer("quantity").notNull(),
-  costPerPerson: decimal("cost_per_person", {
-    precision: 10,
-    scale: 2,
-  }).notNull(),
 });
 
 export const eventMaterials = pgTable("event_materials", {
@@ -63,9 +75,10 @@ export const eventMaterials = pgTable("event_materials", {
   eventId: integer("event_id")
     .notNull()
     .references(() => events.id),
-  name: text("name").notNull(),
+  materialCatalogId: integer("material_catalog_id")
+    .notNull()
+    .references(() => materialCatalog.id),
   quantity: integer("quantity").notNull(),
-  costPerUnit: decimal("cost_per_unit", { precision: 10, scale: 2 }).notNull(),
 });
 
 export const eventDrinks = pgTable("event_drinks", {

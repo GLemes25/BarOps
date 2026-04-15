@@ -24,8 +24,9 @@ import { useEffect, useState } from "react";
 type LaborRecord = {
   id: number;
   role: string;
-  quantity: number;
-  costPerPerson: number;
+  baseCost: number;
+  baseHours: number;
+  extraHourCost: number;
 };
 
 type Props = {
@@ -49,6 +50,9 @@ export function LaborTable({ initialData }: Props) {
     router.refresh();
   };
 
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
   return (
     <div className="p-6">
       <PageHeader
@@ -63,8 +67,7 @@ export function LaborTable({ initialData }: Props) {
         <TableHeader>
           <TableRow>
             <TableHead>Função</TableHead>
-            <TableHead>Quantidade</TableHead>
-            <TableHead>Custo/Pessoa</TableHead>
+            <TableHead>Tabela de Custo</TableHead>
             <TableHead className="w-16">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -72,7 +75,7 @@ export function LaborTable({ initialData }: Props) {
           {laborRecords.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={4}
+                colSpan={3}
                 className="text-center text-muted-foreground"
               >
                 Nenhuma mão de obra cadastrada.
@@ -82,12 +85,9 @@ export function LaborTable({ initialData }: Props) {
             laborRecords.map((labor) => (
               <TableRow key={labor.id}>
                 <TableCell>{labor.role}</TableCell>
-                <TableCell>{labor.quantity}</TableCell>
                 <TableCell>
-                  {labor.costPerPerson.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
+                  {formatCurrency(labor.baseCost)} (por {labor.baseHours}h) +{" "}
+                  {formatCurrency(labor.extraHourCost)}/h extra
                 </TableCell>
                 <TableCell>
                   <TableRowActions

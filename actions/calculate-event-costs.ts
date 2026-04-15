@@ -27,12 +27,12 @@ export const calculateEventCosts = async (
     const totalDrinks = Number(event.guests) * Number(event.avgDrinksPerPerson);
 
     const laborCost = event.labor.reduce(
-      (acc, item) => acc + Number(item.quantity) * Number(item.costPerPerson),
+      (acc, item) => acc + Number(item.quantity) * item.baseCost,
       0,
     );
 
     const materialsCost = event.materials.reduce(
-      (acc, item) => acc + Number(item.quantity) * Number(item.costPerUnit),
+      (acc, item) => acc + Number(item.quantity) * item.defaultCost,
       0,
     );
 

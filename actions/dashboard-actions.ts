@@ -1,7 +1,15 @@
 "use server";
 
 import { db } from "@/db";
-import { drinks, eventDrinks, eventLabor, eventMaterials, events } from "@/db/schema";
+import {
+  drinks,
+  eventDrinks,
+  eventLabor,
+  eventMaterials,
+  events,
+  laborCatalog,
+  materialCatalog,
+} from "@/db/schema";
 import { count, eq, sql } from "drizzle-orm";
 import type { ActionResult } from "./types";
 
@@ -18,20 +26,31 @@ export const getDashboardStats = async (): Promise<ActionResult<DashboardStats>>
       .from(events);
 
     const laborRows = await db
-      .select({ quantity: eventLabor.quantity, costPerPerson: eventLabor.costPerPerson })
-      .from(eventLabor);
+      .select({
+        quantity: eventLabor.quantity,
+        baseCost: laborCatalog.baseCost,
+      })
+      .from(eventLabor)
+      .innerJoin(laborCatalog, eq(laborCatalog.id, eventLabor.laborCatalogId));
 
     const materialRows = await db
-      .select({ quantity: eventMaterials.quantity, costPerUnit: eventMaterials.costPerUnit })
-      .from(eventMaterials);
+      .select({
+        quantity: eventMaterials.quantity,
+        defaultCost: materialCatalog.defaultCost,
+      })
+      .from(eventMaterials)
+      .innerJoin(
+        materialCatalog,
+        eq(materialCatalog.id, eventMaterials.materialCatalogId),
+      );
 
     const laborCost = laborRows.reduce(
-      (acc, row) => acc + Number(row.quantity) * Number(row.costPerPerson),
+      (acc, row) => acc + Number(row.quantity) * Number(row.baseCost),
       0,
     );
 
     const materialsCost = materialRows.reduce(
-      (acc, row) => acc + Number(row.quantity) * Number(row.costPerUnit),
+      (acc, row) => acc + Number(row.quantity) * Number(row.defaultCost),
       0,
     );
 

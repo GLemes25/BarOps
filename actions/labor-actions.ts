@@ -1,28 +1,30 @@
 "use server";
 
 import { db } from "@/db";
-import { eventLabor } from "@/db/schema";
+import { laborCatalog } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "./types";
 
 type LaborInput = {
   role: string;
-  quantity: number;
-  costPerPerson: number;
+  baseCost: number;
+  baseHours: number;
+  extraHourCost: number;
 };
 
 export const getLabor = async () => {
-  const rows = await db.select().from(eventLabor);
+  const rows = await db.select().from(laborCatalog);
   return rows.map((row) => ({
     ...row,
-    costPerPerson: Number(row.costPerPerson),
+    baseCost: Number(row.baseCost),
+    extraHourCost: Number(row.extraHourCost),
   }));
 };
 
 export const deleteLabor = async (id: number): Promise<ActionResult> => {
   try {
-    await db.delete(eventLabor).where(eq(eventLabor.id, id));
+    await db.delete(laborCatalog).where(eq(laborCatalog.id, id));
     revalidatePath("/labor");
     return { success: true };
   } catch (error) {
@@ -31,14 +33,17 @@ export const deleteLabor = async (id: number): Promise<ActionResult> => {
 };
 
 export const createLabor = async (
-  eventId: number,
   values: LaborInput,
 ): Promise<ActionResult<{ id: number }>> => {
   try {
     const [labor] = await db
-      .insert(eventLabor)
-      .values({ ...values, eventId, costPerPerson: String(values.costPerPerson) })
-      .returning({ id: eventLabor.id });
+      .insert(laborCatalog)
+      .values({
+        ...values,
+        baseCost: String(values.baseCost),
+        extraHourCost: String(values.extraHourCost),
+      })
+      .returning({ id: laborCatalog.id });
     revalidatePath("/labor");
     return { success: true, data: { id: labor.id } };
   } catch (error) {
@@ -52,9 +57,13 @@ export const updateLabor = async (
 ): Promise<ActionResult> => {
   try {
     await db
-      .update(eventLabor)
-      .set({ ...values, costPerPerson: String(values.costPerPerson) })
-      .where(eq(eventLabor.id, id));
+      .update(laborCatalog)
+      .set({
+        ...values,
+        baseCost: String(values.baseCost),
+        extraHourCost: String(values.extraHourCost),
+      })
+      .where(eq(laborCatalog.id, id));
     revalidatePath("/labor");
     return { success: true };
   } catch (error) {

@@ -1,4 +1,4 @@
-import { eventLabor, eventMaterials, events } from "@/db/schema";
+import { events, laborCatalog, materialCatalog } from "@/db/schema";
 
 export type ActionResult<T = undefined> = {
   success: boolean;
@@ -7,12 +7,30 @@ export type ActionResult<T = undefined> = {
 };
 
 type EventRow = typeof events.$inferSelect;
-type EventLaborRow = typeof eventLabor.$inferSelect;
-type EventMaterialRow = typeof eventMaterials.$inferSelect;
+
+export type EventLaborWithCatalog = {
+  id: number;
+  eventId: number;
+  laborCatalogId: number;
+  quantity: number;
+  role: string;
+  baseCost: number;
+  baseHours: number;
+  extraHourCost: number;
+};
+
+export type EventMaterialWithCatalog = {
+  id: number;
+  eventId: number;
+  materialCatalogId: number;
+  quantity: number;
+  name: string;
+  defaultCost: number;
+};
 
 export type EventWithRelations = EventRow & {
-  labor: EventLaborRow[];
-  materials: EventMaterialRow[];
+  labor: EventLaborWithCatalog[];
+  materials: EventMaterialWithCatalog[];
 };
 
 export type EventCosts = {

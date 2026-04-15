@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { ingredients, drinks, drinkIngredients } from "./schema";
+import { ingredients, drinks, drinkIngredients, laborCatalog, materialCatalog } from "./schema";
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -86,6 +86,22 @@ async function main() {
   ]);
 
   console.log("Inserted drink_ingredients relationships.");
+
+  await db.insert(laborCatalog).values([
+    { role: "Bartender",    baseCost: "180.00", baseHours: 5, extraHourCost: "60.00" },
+    { role: "Garçom",       baseCost: "120.00", baseHours: 5, extraHourCost: "40.00" },
+    { role: "Barback",      baseCost: "100.00", baseHours: 5, extraHourCost: "35.00" },
+  ]);
+  console.log("Inserted labor_catalog.");
+
+  await db.insert(materialCatalog).values([
+    { name: "Balcão de bar",      defaultCost: "150.00" },
+    { name: "Coqueteleira",       defaultCost: "30.00"  },
+    { name: "Copo long drink",    defaultCost: "2.50"   },
+    { name: "Copo de shot",       defaultCost: "1.50"   },
+  ]);
+  console.log("Inserted material_catalog.");
+
   console.log("Seed complete.");
 }
 

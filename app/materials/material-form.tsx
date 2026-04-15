@@ -1,9 +1,6 @@
 "use client";
 
 import { createMaterial, updateMaterial } from "@/actions/material-actions";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,11 +11,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
 
 const materialSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  quantity: z.coerce.number().int().positive("Deve ser positivo"),
-  costPerUnit: z.coerce.number().positive("Deve ser positivo"),
+  defaultCost: z.coerce.number().positive("Deve ser positivo"),
 });
 
 type MaterialFormValues = z.infer<typeof materialSchema>;
@@ -26,23 +25,20 @@ type MaterialFormValues = z.infer<typeof materialSchema>;
 type MaterialRecord = {
   id: number;
   name: string;
-  quantity: number;
-  costPerUnit: number;
+  defaultCost: number;
 };
 
 type MaterialFormProps = {
-  eventId?: number;
   record?: MaterialRecord | null;
   onSuccess: () => void;
 };
 
-export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) => {
+export const MaterialForm = ({ record, onSuccess }: MaterialFormProps) => {
   const form = useForm<MaterialFormValues>({
     resolver: zodResolver(materialSchema) as Resolver<MaterialFormValues>,
     defaultValues: {
       name: record?.name ?? "",
-      quantity: record?.quantity ?? 1,
-      costPerUnit: record?.costPerUnit ?? 0,
+      defaultCost: record?.defaultCost ?? 0,
     },
   });
 
@@ -52,8 +48,8 @@ export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) 
     try {
       if (record?.id) {
         await updateMaterial(record.id, values);
-      } else if (eventId !== undefined) {
-        await createMaterial(eventId, values);
+      } else {
+        await createMaterial(values);
       }
       onSuccess();
     } catch (error) {
@@ -63,7 +59,10 @@ export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -71,7 +70,7 @@ export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) 
             <FormItem>
               <FormLabel>Nome do material</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: Copo long drink" {...field} />
+                <Input placeholder="Ex: Balcão" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,24 +79,10 @@ export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) 
 
         <FormField
           control={form.control}
-          name="quantity"
+          name="defaultCost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Quantidade</FormLabel>
-              <FormControl>
-                <Input type="number" min={1} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="costPerUnit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Custo por unidade (R$)</FormLabel>
+              <FormLabel>Valor unitário (R$)</FormLabel>
               <FormControl>
                 <Input type="number" min={0} step={0.01} {...field} />
               </FormControl>
@@ -107,7 +92,11 @@ export const MaterialForm = ({ eventId, record, onSuccess }: MaterialFormProps) 
         />
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : record ? "Salvar alterações" : "Adicionar material"}
+          {isSubmitting
+            ? "Salvando..."
+            : record
+              ? "Salvar alterações"
+              : "Adicionar material"}
         </Button>
       </form>
     </Form>
