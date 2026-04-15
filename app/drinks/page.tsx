@@ -8,7 +8,7 @@ const DrinksPage = async () => {
   const availableIngredients = ingredients.map((ing) => ({
     id: ing.id,
     name: ing.name,
-    unit: ing.unit,
+    recipeUnit: ing.recipeUnit,
   }));
 
   return <DrinksTable initialData={drinks} availableIngredients={availableIngredients} />;

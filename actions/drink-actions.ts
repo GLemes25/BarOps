@@ -24,7 +24,7 @@ export const getDrinks = async () => {
       ingredientId: drinkIngredients.ingredientId,
       quantity: drinkIngredients.quantity,
       ingredientName: ingredients.name,
-      unit: ingredients.unit,
+      recipeUnit: ingredients.recipeUnit,
     })
     .from(drinks)
     .leftJoin(drinkIngredients, eq(drinkIngredients.drinkId, drinks.id))
@@ -35,7 +35,7 @@ export const getDrinks = async () => {
     {
       id: number;
       name: string;
-      ingredients: { id: number; name: string; quantity: number; unit: string }[];
+      ingredients: { id: number; name: string; quantity: number; recipeUnit: string }[];
     }
   >();
 
@@ -43,12 +43,12 @@ export const getDrinks = async () => {
     if (!drinkMap.has(row.id)) {
       drinkMap.set(row.id, { id: row.id, name: row.name, ingredients: [] });
     }
-    if (row.ingredientId && row.ingredientName && row.unit && row.quantity) {
+    if (row.ingredientId && row.ingredientName && row.recipeUnit && row.quantity) {
       drinkMap.get(row.id)!.ingredients.push({
         id: row.ingredientId,
         name: row.ingredientName,
         quantity: Number(row.quantity),
-        unit: row.unit,
+        recipeUnit: row.recipeUnit,
       });
     }
   }

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type EventRecord = {
   id: number;
@@ -39,6 +39,7 @@ type Props = {
 export function EventsTable({ initialData }: Props) {
   const router = useRouter();
   const [events, setEvents] = useState<EventRecord[]>(initialData);
+  useEffect(() => { setEvents(initialData); }, [initialData]);
   const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -57,7 +58,9 @@ export function EventsTable({ initialData }: Props) {
       <PageHeader
         title="Eventos"
         dialogTitle="Novo Evento"
-        dialogContent={(onClose) => <EventForm onSuccess={onClose} />}
+        dialogContent={(onClose) => (
+          <EventForm onSuccess={() => { onClose(); router.refresh(); }} />
+        )}
       />
 
       <Table>
@@ -110,7 +113,7 @@ export function EventsTable({ initialData }: Props) {
           </DialogHeader>
           <EventForm
             record={selectedEvent}
-            onSuccess={() => setIsEditOpen(false)}
+            onSuccess={() => { setIsEditOpen(false); router.refresh(); }}
           />
         </DialogContent>
       </Dialog>

@@ -13,17 +13,17 @@ async function main() {
   const insertedIngredients = await db
     .insert(ingredients)
     .values([
-      { name: "Suco de limão",       unit: "ml", costPerUnit: "0.0200" },
-      { name: "Vodka",               unit: "ml", costPerUnit: "0.0800" },
-      { name: "Gin",                 unit: "ml", costPerUnit: "0.1200" },
-      { name: "Rum",                 unit: "ml", costPerUnit: "0.0700" },
-      { name: "Xarope de açúcar",    unit: "ml", costPerUnit: "0.0150" },
-      { name: "Xarope de gengibre",  unit: "ml", costPerUnit: "0.0300" },
-      { name: "Emulsificante",       unit: "ml", costPerUnit: "0.0500" },
-      { name: "Polpa de maracujá",   unit: "ml", costPerUnit: "0.0250" },
-      { name: "Energético tropical", unit: "ml", costPerUnit: "0.0600" },
-      { name: "Água tônica",         unit: "ml", costPerUnit: "0.0180" },
-      { name: "Gelo",                unit: "g",  costPerUnit: "0.0010" },
+      { name: "Suco de limão",       recipeUnit: "ml", purchaseUnit: "Garrafa 1L",    purchaseCost: "20.00", yieldQuantity: "1000" },
+      { name: "Vodka",               recipeUnit: "ml", purchaseUnit: "Garrafa 1L",    purchaseCost: "80.00", yieldQuantity: "1000" },
+      { name: "Gin",                 recipeUnit: "ml", purchaseUnit: "Garrafa 1L",    purchaseCost: "120.00", yieldQuantity: "1000" },
+      { name: "Rum",                 recipeUnit: "ml", purchaseUnit: "Garrafa 1L",    purchaseCost: "70.00", yieldQuantity: "1000" },
+      { name: "Xarope de açúcar",    recipeUnit: "ml", purchaseUnit: "Garrafa 1L",    purchaseCost: "15.00", yieldQuantity: "1000" },
+      { name: "Xarope de gengibre",  recipeUnit: "ml", purchaseUnit: "Garrafa 500ml", purchaseCost: "15.00", yieldQuantity: "500" },
+      { name: "Emulsificante",       recipeUnit: "ml", purchaseUnit: "Garrafa 500ml", purchaseCost: "25.00", yieldQuantity: "500" },
+      { name: "Polpa de maracujá",   recipeUnit: "ml", purchaseUnit: "Pacote 1L",     purchaseCost: "25.00", yieldQuantity: "1000" },
+      { name: "Energético tropical", recipeUnit: "ml", purchaseUnit: "Lata 355ml",    purchaseCost: "21.30", yieldQuantity: "355" },
+      { name: "Água tônica",         recipeUnit: "ml", purchaseUnit: "Garrafa 350ml", purchaseCost: "6.30",  yieldQuantity: "350" },
+      { name: "Gelo",                recipeUnit: "g",  purchaseUnit: "Saco 5Kg",      purchaseCost: "5.00",  yieldQuantity: "5000" },
     ])
     .returning();
 

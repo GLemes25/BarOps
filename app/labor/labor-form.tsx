@@ -1,9 +1,6 @@
 "use client";
 
 import { createLabor, updateLabor } from "@/actions/labor-actions";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,6 +11,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
 
 const laborSchema = z.object({
   role: z.string().min(1, "Função é obrigatória"),
@@ -50,9 +50,15 @@ export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
 
   const onSubmit = async (values: LaborFormValues) => {
     try {
+      console.log("record?.id " + record?.id);
+      console.log("eventId " + eventId);
+
       if (record?.id) {
+        console.log("up");
         await updateLabor(record.id, values);
       } else if (eventId !== undefined) {
+        console.log("cr");
+
         await createLabor(eventId, values);
       }
       onSuccess();
@@ -63,7 +69,10 @@ export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="role"
@@ -107,7 +116,11 @@ export const LaborForm = ({ eventId, record, onSuccess }: LaborFormProps) => {
         />
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : record ? "Salvar alterações" : "Adicionar mão de obra"}
+          {isSubmitting
+            ? "Salvando..."
+            : record
+              ? "Salvar alterações"
+              : "Adicionar mão de obra"}
         </Button>
       </form>
     </Form>

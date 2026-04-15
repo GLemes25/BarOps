@@ -42,7 +42,8 @@ export const calculateEventCosts = async (
       .where(inArray(ingredients.name, [...FOAM_INGREDIENTS]));
 
     const foamIngredientsCost = foamIngredients.reduce(
-      (acc, ingredient) => acc + Number(ingredient.costPerUnit),
+      (acc, ingredient) =>
+        acc + Number(ingredient.purchaseCost) / Number(ingredient.yieldQuantity),
       0,
     );
 

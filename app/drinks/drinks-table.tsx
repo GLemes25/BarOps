@@ -19,12 +19,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type DrinkRecord = {
   id: number;
   name: string;
-  ingredients: { id: number; name: string; quantity: number; unit: string }[];
+  ingredients: { id: number; name: string; quantity: number; recipeUnit: string }[];
 };
 
 type Props = {
@@ -34,7 +34,8 @@ type Props = {
 
 export function DrinksTable({ initialData, availableIngredients }: Props) {
   const router = useRouter();
-  const [drinks] = useState<DrinkRecord[]>(initialData);
+  const [drinks, setDrinks] = useState<DrinkRecord[]>(initialData);
+  useEffect(() => { setDrinks(initialData); }, [initialData]);
   const [selectedDrink, setSelectedDrink] = useState<DrinkRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -54,7 +55,10 @@ export function DrinksTable({ initialData, availableIngredients }: Props) {
         title="Bebidas"
         dialogTitle="Nova Bebida"
         dialogContent={(onClose) => (
-          <DrinkForm onSuccess={onClose} availableIngredients={availableIngredients} />
+          <DrinkForm
+            onSuccess={() => { onClose(); router.refresh(); }}
+            availableIngredients={availableIngredients}
+          />
         )}
       />
 
@@ -84,7 +88,7 @@ export function DrinksTable({ initialData, availableIngredients }: Props) {
                   {drink.ingredients.length === 0
                     ? "—"
                     : drink.ingredients
-                        .map((ing) => `${ing.name} (${ing.quantity}${ing.unit})`)
+                        .map((ing) => `${ing.name} (${ing.quantity}${ing.recipeUnit})`)
                         .join(", ")}
                 </TableCell>
                 <TableCell>

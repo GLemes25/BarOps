@@ -26,7 +26,7 @@ import { z } from "zod";
 export type IngredientOption = {
   id: number;
   name: string;
-  unit: string;
+  recipeUnit: string;
 };
 
 const drinkSchema = z.object({
@@ -44,7 +44,7 @@ type DrinkFormValues = z.infer<typeof drinkSchema>;
 type DrinkRecord = {
   id: number;
   name: string;
-  ingredients: { id: number; name: string; quantity: number; unit: string }[];
+  ingredients: { id: number; name: string; quantity: number; recipeUnit: string }[];
 };
 
 type DrinkFormProps = {
@@ -131,7 +131,7 @@ export const DrinkForm = ({
                       <SelectContent>
                         {availableIngredients.map((ing) => (
                           <SelectItem key={ing.id} value={String(ing.id)}>
-                            {ing.name} ({ing.unit})
+                            {ing.name} ({ing.recipeUnit})
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -39,6 +39,7 @@ export const createMaterial = async (
       .insert(eventMaterials)
       .values({ ...values, eventId, costPerUnit: String(values.costPerUnit) })
       .returning({ id: eventMaterials.id });
+    revalidatePath("/materials");
     return { success: true, data: { id: material.id } };
   } catch (error) {
     return { success: false, error: String(error) };
@@ -54,6 +55,7 @@ export const updateMaterial = async (
       .update(eventMaterials)
       .set({ ...values, costPerUnit: String(values.costPerUnit) })
       .where(eq(eventMaterials.id, id));
+    revalidatePath("/materials");
     return { success: true };
   } catch (error) {
     return { success: false, error: String(error) };

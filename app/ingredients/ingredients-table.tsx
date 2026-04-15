@@ -19,13 +19,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type IngredientRecord = {
   id: number;
   name: string;
-  unit: string;
-  costPerUnit: number;
+  recipeUnit: string;
+  purchaseUnit: string;
+  purchaseCost: number;
+  yieldQuantity: number;
 };
 
 type Props = {
@@ -36,6 +38,9 @@ export function IngredientsTable({ initialData }: Props) {
   const router = useRouter();
   const [ingredients, setIngredients] =
     useState<IngredientRecord[]>(initialData);
+  useEffect(() => {
+    setIngredients(initialData);
+  }, [initialData]);
   const [selectedIngredient, setSelectedIngredient] =
     useState<IngredientRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -55,15 +60,25 @@ export function IngredientsTable({ initialData }: Props) {
       <PageHeader
         title="Ingredientes"
         dialogTitle="Novo Ingrediente"
-        dialogContent={(onClose) => <IngredientForm onSuccess={onClose} />}
+        dialogContent={(onClose) => (
+          <IngredientForm
+            onSuccess={() => {
+              onClose();
+              router.refresh();
+            }}
+          />
+        )}
       />
 
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Unidade</TableHead>
-            <TableHead>Custo/Unidade</TableHead>
+            <TableHead>Un. Receita</TableHead>
+            <TableHead>Un. Compra</TableHead>
+            <TableHead>Custo de Compra</TableHead>
+            <TableHead>Fator Rendimento</TableHead>
+            <TableHead>Custo/Un. Receita</TableHead>
             <TableHead className="w-16">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -71,7 +86,7 @@ export function IngredientsTable({ initialData }: Props) {
           {ingredients.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={4}
+                colSpan={7}
                 className="text-center text-muted-foreground"
               >
                 Nenhum ingrediente cadastrado.
@@ -81,13 +96,28 @@ export function IngredientsTable({ initialData }: Props) {
             ingredients.map((ingredient) => (
               <TableRow key={ingredient.id}>
                 <TableCell>{ingredient.name}</TableCell>
-                <TableCell>{ingredient.unit}</TableCell>
+                <TableCell>{ingredient.recipeUnit}</TableCell>
+                <TableCell>{ingredient.purchaseUnit}</TableCell>
                 <TableCell>
-                  {ingredient.costPerUnit.toLocaleString("pt-BR", {
+                  {ingredient.purchaseCost.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </TableCell>
+                <TableCell>
+                  {ingredient.yieldQuantity} {ingredient.recipeUnit}/
+                  {ingredient.purchaseUnit}
+                </TableCell>
+                <TableCell>
+                  {(
+                    ingredient.purchaseCost / ingredient.yieldQuantity
+                  ).toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                     minimumFractionDigits: 2,
+                    maximumFractionDigits: 4,
                   })}
+                  /{ingredient.recipeUnit}
                 </TableCell>
                 <TableCell>
                   <TableRowActions
@@ -108,7 +138,10 @@ export function IngredientsTable({ initialData }: Props) {
           </DialogHeader>
           <IngredientForm
             record={selectedIngredient}
-            onSuccess={() => setIsEditOpen(false)}
+            onSuccess={() => {
+              setIsEditOpen(false);
+              router.refresh();
+            }}
           />
         </DialogContent>
       </Dialog>

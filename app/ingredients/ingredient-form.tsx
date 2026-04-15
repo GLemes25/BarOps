@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,8 +21,10 @@ import { z } from "zod";
 
 const ingredientSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  unit: z.string().min(1, "Unidade é obrigatória"),
-  costPerUnit: z.coerce.number().positive("Deve ser positivo"),
+  recipeUnit: z.string().min(1, "Unidade de receita é obrigatória"),
+  purchaseUnit: z.string().min(1, "Unidade de compra é obrigatória"),
+  purchaseCost: z.coerce.number().positive("Deve ser positivo"),
+  yieldQuantity: z.coerce.number().positive("Deve ser positivo"),
 });
 
 type IngredientFormValues = z.infer<typeof ingredientSchema>;
@@ -29,8 +32,10 @@ type IngredientFormValues = z.infer<typeof ingredientSchema>;
 type IngredientRecord = {
   id: number;
   name: string;
-  unit: string;
-  costPerUnit: number;
+  recipeUnit: string;
+  purchaseUnit: string;
+  purchaseCost: number;
+  yieldQuantity: number;
 };
 
 type IngredientFormProps = {
@@ -43,8 +48,10 @@ export const IngredientForm = ({ record, onSuccess }: IngredientFormProps) => {
     resolver: zodResolver(ingredientSchema) as Resolver<IngredientFormValues>,
     defaultValues: {
       name: record?.name ?? "",
-      unit: record?.unit ?? "",
-      costPerUnit: record?.costPerUnit ?? 0,
+      recipeUnit: record?.recipeUnit ?? "",
+      purchaseUnit: record?.purchaseUnit ?? "",
+      purchaseCost: record?.purchaseCost ?? 0,
+      yieldQuantity: record?.yieldQuantity ?? 0,
     },
   });
 
@@ -85,12 +92,12 @@ export const IngredientForm = ({ record, onSuccess }: IngredientFormProps) => {
 
         <FormField
           control={form.control}
-          name="unit"
+          name="recipeUnit"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Unidade</FormLabel>
+              <FormLabel>Unidade de receita</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: ml" {...field} />
+                <Input placeholder="Ex: ml, un" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -99,13 +106,44 @@ export const IngredientForm = ({ record, onSuccess }: IngredientFormProps) => {
 
         <FormField
           control={form.control}
-          name="costPerUnit"
+          name="purchaseUnit"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Custo por unidade (R$)</FormLabel>
+              <FormLabel>Unidade de compra</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: Kg, Garrafa 1L" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="purchaseCost"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Custo de compra (R$)</FormLabel>
+              <FormControl>
+                <Input type="number" min={0} step={0.01} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="yieldQuantity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fator de rendimento</FormLabel>
               <FormControl>
                 <Input type="number" min={0} step={0.0001} {...field} />
               </FormControl>
+              <FormDescription>
+                Ex: Quantos ml rende 1 Kg ou 1 Garrafa
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

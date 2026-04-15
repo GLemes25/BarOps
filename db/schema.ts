@@ -28,8 +28,10 @@ export const drinks = pgTable("drinks", {
 export const ingredients = pgTable("ingredients", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  unit: text("unit").notNull(),
-  costPerUnit: decimal("cost_per_unit", { precision: 10, scale: 4 }).notNull(),
+  recipeUnit: text("recipe_unit").notNull(),
+  purchaseUnit: text("purchase_unit").notNull(),
+  purchaseCost: decimal("purchase_cost", { precision: 10, scale: 2 }).notNull(),
+  yieldQuantity: decimal("yield_quantity", { precision: 10, scale: 4 }).notNull(),
 });
 
 export const drinkIngredients = pgTable("drink_ingredients", {

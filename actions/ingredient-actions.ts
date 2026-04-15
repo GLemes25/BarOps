@@ -8,15 +8,18 @@ import type { ActionResult } from "./types";
 
 type IngredientInput = {
   name: string;
-  unit: string;
-  costPerUnit: number;
+  recipeUnit: string;
+  purchaseUnit: string;
+  purchaseCost: number;
+  yieldQuantity: number;
 };
 
 export const getIngredients = async () => {
   const rows = await db.select().from(ingredients);
   return rows.map((row) => ({
     ...row,
-    costPerUnit: Number(row.costPerUnit),
+    purchaseCost: Number(row.purchaseCost),
+    yieldQuantity: Number(row.yieldQuantity),
   }));
 };
 
@@ -36,8 +39,13 @@ export const createIngredient = async (
   try {
     const [ingredient] = await db
       .insert(ingredients)
-      .values({ ...values, costPerUnit: String(values.costPerUnit) })
+      .values({
+        ...values,
+        purchaseCost: String(values.purchaseCost),
+        yieldQuantity: String(values.yieldQuantity),
+      })
       .returning({ id: ingredients.id });
+    revalidatePath("/ingredients");
     return { success: true, data: { id: ingredient.id } };
   } catch (error) {
     return { success: false, error: String(error) };
@@ -51,8 +59,13 @@ export const updateIngredient = async (
   try {
     await db
       .update(ingredients)
-      .set({ ...values, costPerUnit: String(values.costPerUnit) })
+      .set({
+        ...values,
+        purchaseCost: String(values.purchaseCost),
+        yieldQuantity: String(values.yieldQuantity),
+      })
       .where(eq(ingredients.id, id));
+    revalidatePath("/ingredients");
     return { success: true };
   } catch (error) {
     return { success: false, error: String(error) };

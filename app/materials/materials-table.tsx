@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type MaterialRecord = {
   id: number;
@@ -35,6 +35,7 @@ type Props = {
 export function MaterialsTable({ initialData }: Props) {
   const router = useRouter();
   const [materials, setMaterials] = useState<MaterialRecord[]>(initialData);
+  useEffect(() => { setMaterials(initialData); }, [initialData]);
   const [selectedMaterial, setSelectedMaterial] =
     useState<MaterialRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -54,7 +55,9 @@ export function MaterialsTable({ initialData }: Props) {
       <PageHeader
         title="Materiais"
         dialogTitle="Novo Material"
-        dialogContent={(onClose) => <MaterialForm onSuccess={onClose} />}
+        dialogContent={(onClose) => (
+          <MaterialForm onSuccess={() => { onClose(); router.refresh(); }} />
+        )}
       />
 
       <Table>
@@ -106,7 +109,7 @@ export function MaterialsTable({ initialData }: Props) {
           </DialogHeader>
           <MaterialForm
             record={selectedMaterial}
-            onSuccess={() => setIsEditOpen(false)}
+            onSuccess={() => { setIsEditOpen(false); router.refresh(); }}
           />
         </DialogContent>
       </Dialog>

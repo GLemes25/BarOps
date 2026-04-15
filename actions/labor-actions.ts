@@ -39,6 +39,7 @@ export const createLabor = async (
       .insert(eventLabor)
       .values({ ...values, eventId, costPerPerson: String(values.costPerPerson) })
       .returning({ id: eventLabor.id });
+    revalidatePath("/labor");
     return { success: true, data: { id: labor.id } };
   } catch (error) {
     return { success: false, error: String(error) };
@@ -54,6 +55,7 @@ export const updateLabor = async (
       .update(eventLabor)
       .set({ ...values, costPerPerson: String(values.costPerPerson) })
       .where(eq(eventLabor.id, id));
+    revalidatePath("/labor");
     return { success: true };
   } catch (error) {
     return { success: false, error: String(error) };

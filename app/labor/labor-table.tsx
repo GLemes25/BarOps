@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type LaborRecord = {
   id: number;
@@ -35,6 +35,7 @@ type Props = {
 export function LaborTable({ initialData }: Props) {
   const router = useRouter();
   const [laborRecords, setLaborRecords] = useState<LaborRecord[]>(initialData);
+  useEffect(() => { setLaborRecords(initialData); }, [initialData]);
   const [selectedLabor, setSelectedLabor] = useState<LaborRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -53,7 +54,9 @@ export function LaborTable({ initialData }: Props) {
       <PageHeader
         title="Mão de Obra"
         dialogTitle="Nova Mão de Obra"
-        dialogContent={(onClose) => <LaborForm onSuccess={onClose} />}
+        dialogContent={(onClose) => (
+          <LaborForm onSuccess={() => { onClose(); router.refresh(); }} />
+        )}
       />
 
       <Table>
@@ -105,7 +108,7 @@ export function LaborTable({ initialData }: Props) {
           </DialogHeader>
           <LaborForm
             record={selectedLabor}
-            onSuccess={() => setIsEditOpen(false)}
+            onSuccess={() => { setIsEditOpen(false); router.refresh(); }}
           />
         </DialogContent>
       </Dialog>
