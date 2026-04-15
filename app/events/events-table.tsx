@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import dayjs from "dayjs";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -88,7 +89,14 @@ export function EventsTable({ initialData }: Props) {
           ) : (
             events.map((event) => (
               <TableRow key={event.id}>
-                <TableCell>{event.name}</TableCell>
+                <TableCell>
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="hover:underline font-medium"
+                  >
+                    {event.name}
+                  </Link>
+                </TableCell>
                 <TableCell>{dayjs(event.date).format("DD/MM/YYYY")}</TableCell>
                 <TableCell>{event.guests}</TableCell>
                 <TableCell>{event.durationHours}h</TableCell>
