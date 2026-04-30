@@ -1,4 +1,5 @@
 import {
+  boolean,
   decimal,
   integer,
   pgTable,
@@ -29,9 +30,21 @@ export const ingredients = pgTable("ingredients", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   recipeUnit: text("recipe_unit").notNull(),
-  purchaseUnit: text("purchase_unit").notNull(),
-  purchaseCost: decimal("purchase_cost", { precision: 10, scale: 2 }).notNull(),
+  purchaseUnit: text("purchase_unit"),
+  purchaseCost: decimal("purchase_cost", { precision: 10, scale: 2 }),
   yieldQuantity: decimal("yield_quantity", { precision: 10, scale: 4 }).notNull(),
+  isSubRecipe: boolean("is_sub_recipe").default(false).notNull(),
+});
+
+export const ingredientComponents = pgTable("ingredient_components", {
+  id: serial("id").primaryKey(),
+  parentId: integer("parent_id")
+    .notNull()
+    .references(() => ingredients.id),
+  childId: integer("child_id")
+    .notNull()
+    .references(() => ingredients.id),
+  quantity: decimal("quantity", { precision: 10, scale: 4 }).notNull(),
 });
 
 export const drinkIngredients = pgTable("drink_ingredients", {

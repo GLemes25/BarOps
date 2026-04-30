@@ -1,9 +1,11 @@
 "use client";
 
+import type { IngredientRecord } from "@/actions/ingredient-actions";
 import { deleteIngredient } from "@/actions/ingredient-actions";
 import { IngredientForm } from "@/app/ingredients/ingredient-form";
 import { PageHeader } from "@/components/page-header";
 import { TableRowActions } from "@/components/table-row-actions";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -20,15 +22,6 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-type IngredientRecord = {
-  id: number;
-  name: string;
-  recipeUnit: string;
-  purchaseUnit: string;
-  purchaseCost: number;
-  yieldQuantity: number;
-};
 
 type Props = {
   initialData: IngredientRecord[];
@@ -62,6 +55,7 @@ export function IngredientsTable({ initialData }: Props) {
         dialogTitle="Novo Ingrediente"
         dialogContent={(onClose) => (
           <IngredientForm
+            availableIngredients={ingredients}
             onSuccess={() => {
               onClose();
               router.refresh();
@@ -95,29 +89,40 @@ export function IngredientsTable({ initialData }: Props) {
           ) : (
             ingredients.map((ingredient) => (
               <TableRow key={ingredient.id}>
-                <TableCell>{ingredient.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {ingredient.name}
+                    {ingredient.isSubRecipe && (
+                      <Badge variant="secondary">Pre-Batch</Badge>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell>{ingredient.recipeUnit}</TableCell>
-                <TableCell>{ingredient.purchaseUnit}</TableCell>
+                <TableCell>{ingredient.purchaseUnit ?? "—"}</TableCell>
                 <TableCell>
-                  {ingredient.purchaseCost.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
+                  {ingredient.purchaseCost !== null
+                    ? ingredient.purchaseCost.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })
+                    : "—"}
                 </TableCell>
                 <TableCell>
-                  {ingredient.yieldQuantity} {ingredient.recipeUnit}/
-                  {ingredient.purchaseUnit}
+                  {ingredient.yieldQuantity} {ingredient.recipeUnit}
+                  {ingredient.purchaseUnit ? `/${ingredient.purchaseUnit}` : ""}
                 </TableCell>
                 <TableCell>
-                  {(
-                    ingredient.purchaseCost / ingredient.yieldQuantity
-                  ).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 4,
-                  })}
-                  /{ingredient.recipeUnit}
+                  {ingredient.purchaseCost !== null &&
+                  ingredient.yieldQuantity > 0
+                    ? (
+                        ingredient.purchaseCost / ingredient.yieldQuantity
+                      ).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 4,
+                      }) + `/${ingredient.recipeUnit}`
+                    : "—"}
                 </TableCell>
                 <TableCell>
                   <TableRowActions
@@ -138,6 +143,7 @@ export function IngredientsTable({ initialData }: Props) {
           </DialogHeader>
           <IngredientForm
             record={selectedIngredient}
+            availableIngredients={ingredients}
             onSuccess={() => {
               setIsEditOpen(false);
               router.refresh();
