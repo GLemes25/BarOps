@@ -27,6 +27,12 @@ const ShoppingListPage = async ({ params }: Props) => {
     getEventShoppingList(eventId),
   ]);
 
+  // Se der erro, ele vai cuspir o motivo real no terminal do VSCode!
+  if (!eventResult.success || !eventResult.data) {
+    console.error("FALHA NA BUSCA DO EVENTO:", eventResult);
+    notFound();
+  }
+
   if (!eventResult.success || !eventResult.data) notFound();
 
   const event = eventResult.data;
@@ -52,8 +58,7 @@ const ShoppingListPage = async ({ params }: Props) => {
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold">Lista de Compras</h1>
         <p className="text-muted-foreground text-sm">
-          {event.name} ·{" "}
-          {dayjs(event.date).format("D [de] MMMM [de] YYYY")} ·{" "}
+          {event.name} · {dayjs(event.date).format("D [de] MMMM [de] YYYY")} ·{" "}
           {event.guests} convidado{event.guests !== 1 ? "s" : ""}
         </p>
       </div>
