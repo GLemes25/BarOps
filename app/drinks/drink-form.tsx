@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
 
 export type IngredientOption = {
@@ -33,8 +33,8 @@ const drinkSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   ingredients: z.array(
     z.object({
-      ingredientId: z.number(),
-      quantity: z.number().positive("Quantidade deve ser positiva"),
+      ingredientId: z.coerce.number(), // Adicionado o coerce aqui por segurança
+      quantity: z.coerce.number().positive("Quantidade deve ser positiva"), // Correção principal aplicada aqui!
     }),
   ),
 });
@@ -44,7 +44,12 @@ type DrinkFormValues = z.infer<typeof drinkSchema>;
 type DrinkRecord = {
   id: number;
   name: string;
-  ingredients: { id: number; name: string; quantity: number; recipeUnit: string }[];
+  ingredients: {
+    id: number;
+    name: string;
+    quantity: number;
+    recipeUnit: string;
+  }[];
 };
 
 type DrinkFormProps = {
@@ -59,7 +64,7 @@ export const DrinkForm = ({
   availableIngredients,
 }: DrinkFormProps) => {
   const form = useForm<DrinkFormValues>({
-    resolver: zodResolver(drinkSchema),
+    resolver: zodResolver(drinkSchema) as Resolver<DrinkFormValues>, // Adicionado Resolver para evitar erros de tipagem do TS
     defaultValues: {
       name: record?.name ?? "",
       ingredients:
@@ -125,7 +130,13 @@ export const DrinkForm = ({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione um ingrediente" />
+                          <SelectValue placeholder="Selecione um ingrediente">
+                            {f.value
+                              ? availableIngredients.find(
+                                  (ing) => ing.id === f.value,
+                                )?.name
+                              : "Selecione um ingrediente"}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

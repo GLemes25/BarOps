@@ -34,7 +34,7 @@ Use estes commits passados do repositório como seu padrão de tom e estrutura:
 
 ## 4. Fluxo de Execução
 
-1. Analise brevemente os arquivos modificados (adicione-os ao _stage_ com `git add` se o usuário solicitar).
+1. Analise brevemente os arquivos modificados (adicione-os ao _stage_ com `git add .` sempre).
 2. Gere a mensagem de commit apropriada silenciosamente em inglês.
 3. Execute automaticamente o comando do git: `git commit -m "<mensagem_gerada>"`
 4. Exiba uma breve confirmação de sucesso mostrando a mensagem que foi commitada.
