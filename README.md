@@ -1,16 +1,18 @@
-# 🍸 BarOps - Gerenciador de Orçamentos para Eventos
+<div align="center">
+  <img src="public/BarOpsIcon.svg" alt="Logo BarOps" width="300" />
 
-![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-green?style=for-the-badge)
+# BarOps - ERP & Planejamento de Eventos para Coquetelaria
+
+![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-success?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Drizzle ORM](https://img.shields.io/badge/Drizzle-000000?style=for-the-badge)
-![Neon DB](https://img.shields.io/badge/Neon_Serverless-00E599?style=for-the-badge)
-![shadcn/ui](https://img.shields.io/badge/shadcn/ui-111827?style=for-the-badge)
+![Drizzle](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)
+![Neon](https://img.shields.io/badge/Neon_DB-00E599?style=for-the-badge&logo=postgresql&logoColor=black)
 ![pnpm](https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white)
 
----
+</div>
 
 > Projeto desenvolvido com foco em demonstrar **engenharia de software full-stack moderna**, modelagem de dados e resolução de problemas reais de negócio no setor de eventos.
 
