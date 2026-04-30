@@ -55,6 +55,9 @@ export const getEvents = async () => {
 
 export const deleteEvent = async (id: number): Promise<ActionResult> => {
   try {
+    await db.delete(eventDrinks).where(eq(eventDrinks.eventId, id));
+    await db.delete(eventLabor).where(eq(eventLabor.eventId, id));
+    await db.delete(eventMaterials).where(eq(eventMaterials.eventId, id));
     await db.delete(events).where(eq(events.id, id));
     revalidatePath("/events");
     return { success: true };

@@ -50,8 +50,13 @@ export function EventsTable({ initialData }: Props) {
   };
 
   const handleDelete = async (id: number) => {
-    await deleteEvent(id);
-    router.refresh();
+    const result = await deleteEvent(id);
+    if (!result.success) {
+      console.error("Erro ao deletar:", result.error);
+      alert("Não foi possível excluir o evento.");
+    } else {
+      router.refresh();
+    }
   };
 
   return (
