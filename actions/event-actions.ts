@@ -8,6 +8,7 @@ import {
   eventLabor,
   eventMaterials,
   events,
+  ingredientComponents,
   ingredients,
   laborCatalog,
   materialCatalog,
@@ -23,6 +24,16 @@ export type ShoppingListItem = {
   quantityToBuy: number;
   purchaseUnit: string;
   estimatedCost: number;
+};
+
+type RawIngredientTotal = {
+  name: string;
+  recipeUnit: string;
+  purchaseUnit: string;
+  purchaseCost: number;
+  yieldQuantity: number;
+  isSubRecipe: boolean;
+  totalNeeded: number;
 };
 
 type EventInput = {
@@ -99,6 +110,66 @@ export const updateEvent = async (
   }
 };
 
+const expandIngredientTotals = async (
+  ingredientTotals: Map<number, RawIngredientTotal>,
+): Promise<Map<number, RawIngredientTotal>> => {
+  const result = new Map<number, RawIngredientTotal>();
+
+  for (const [id, ing] of ingredientTotals) {
+    if (!ing.isSubRecipe) {
+      const existing = result.get(id);
+      if (existing) {
+        existing.totalNeeded += ing.totalNeeded;
+      } else {
+        result.set(id, { ...ing });
+      }
+      continue;
+    }
+
+    const recipesNeeded = ing.totalNeeded / ing.yieldQuantity;
+
+    const childRows = await db
+      .select({
+        childId: ingredientComponents.childId,
+        quantity: ingredientComponents.quantity,
+        name: ingredients.name,
+        recipeUnit: ingredients.recipeUnit,
+        purchaseUnit: ingredients.purchaseUnit,
+        purchaseCost: ingredients.purchaseCost,
+        yieldQuantity: ingredients.yieldQuantity,
+        isSubRecipe: ingredients.isSubRecipe,
+      })
+      .from(ingredientComponents)
+      .innerJoin(ingredients, eq(ingredients.id, ingredientComponents.childId))
+      .where(eq(ingredientComponents.parentId, id));
+
+    const childTotals = new Map<number, RawIngredientTotal>();
+    for (const child of childRows) {
+      childTotals.set(child.childId, {
+        name: child.name,
+        recipeUnit: child.recipeUnit,
+        purchaseUnit: child.purchaseUnit ?? "",
+        purchaseCost: Number(child.purchaseCost ?? 0),
+        yieldQuantity: Number(child.yieldQuantity),
+        isSubRecipe: child.isSubRecipe,
+        totalNeeded: Number(child.quantity) * recipesNeeded,
+      });
+    }
+
+    const expanded = await expandIngredientTotals(childTotals);
+    for (const [childId, childIng] of expanded) {
+      const existing = result.get(childId);
+      if (existing) {
+        existing.totalNeeded += childIng.totalNeeded;
+      } else {
+        result.set(childId, { ...childIng });
+      }
+    }
+  }
+
+  return result;
+};
+
 export const getEventShoppingList = async (
   eventId: number,
 ): Promise<ShoppingListItem[]> => {
@@ -119,17 +190,7 @@ export const getEventShoppingList = async (
   const drinkCount = eventDrinkRows.length;
   const drinksPerType = event.totalDrinks / drinkCount;
 
-  const ingredientTotals = new Map<
-    number,
-    {
-      name: string;
-      recipeUnit: string;
-      purchaseUnit: string;
-      purchaseCost: number;
-      yieldQuantity: number;
-      totalNeeded: number;
-    }
-  >();
+  const ingredientTotals = new Map<number, RawIngredientTotal>();
 
   for (const { drinkId } of eventDrinkRows) {
     const rows = await db
@@ -141,6 +202,7 @@ export const getEventShoppingList = async (
         purchaseUnit: ingredients.purchaseUnit,
         purchaseCost: ingredients.purchaseCost,
         yieldQuantity: ingredients.yieldQuantity,
+        isSubRecipe: ingredients.isSubRecipe,
       })
       .from(drinkIngredients)
       .innerJoin(
@@ -159,16 +221,19 @@ export const getEventShoppingList = async (
         ingredientTotals.set(row.ingredientId, {
           name: row.name,
           recipeUnit: row.recipeUnit,
-          purchaseUnit: row.purchaseUnit,
-          purchaseCost: Number(row.purchaseCost),
+          purchaseUnit: row.purchaseUnit ?? "",
+          purchaseCost: Number(row.purchaseCost ?? 0),
           yieldQuantity: Number(row.yieldQuantity),
+          isSubRecipe: row.isSubRecipe,
           totalNeeded: needed,
         });
       }
     }
   }
 
-  return Array.from(ingredientTotals.values()).map((ing) => {
+  const finalTotals = await expandIngredientTotals(ingredientTotals);
+
+  return Array.from(finalTotals.values()).map((ing) => {
     const quantityToBuy = Math.ceil(ing.totalNeeded / ing.yieldQuantity);
     return {
       ingredientName: ing.name,
@@ -230,113 +295,111 @@ export type EventReport = {
 };
 
 export const getEventReport = async (eventId: number): Promise<EventReport> => {
-  return db.transaction(async (tx) => {
-    const [event] = await tx
-      .select()
-      .from(events)
-      .where(eq(events.id, eventId));
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, eventId));
 
-    if (!event) {
-      return {
-        totalCostDrinks: 0,
-        totalCostLabor: 0,
-        totalCostMaterials: 0,
-        grandTotal: 0,
-      };
-    }
+  if (!event) {
+    return {
+      totalCostDrinks: 0,
+      totalCostLabor: 0,
+      totalCostMaterials: 0,
+      grandTotal: 0,
+    };
+  }
 
-    const eventDrinkRows = await tx
-      .select({ drinkId: eventDrinks.drinkId })
-      .from(eventDrinks)
-      .where(eq(eventDrinks.eventId, eventId));
+  const eventDrinkRows = await db
+    .select({ drinkId: eventDrinks.drinkId })
+    .from(eventDrinks)
+    .where(eq(eventDrinks.eventId, eventId));
 
-    const [laborRows, materialRows] = await Promise.all([
-      tx
-        .select({
-          quantity: eventLabor.quantity,
-          baseCost: laborCatalog.baseCost,
-          baseHours: laborCatalog.baseHours,
-          extraHourCost: laborCatalog.extraHourCost,
-        })
-        .from(eventLabor)
-        .innerJoin(laborCatalog, eq(laborCatalog.id, eventLabor.laborCatalogId))
-        .where(eq(eventLabor.eventId, eventId)),
-      tx
-        .select({
-          quantity: eventMaterials.quantity,
-          defaultCost: materialCatalog.defaultCost,
-        })
-        .from(eventMaterials)
-        .innerJoin(
-          materialCatalog,
-          eq(materialCatalog.id, eventMaterials.materialCatalogId),
-        )
-        .where(eq(eventMaterials.eventId, eventId)),
-    ]);
+  const [laborRows, materialRows] = await Promise.all([
+    db
+      .select({
+        quantity: eventLabor.quantity,
+        baseCost: laborCatalog.baseCost,
+        baseHours: laborCatalog.baseHours,
+        extraHourCost: laborCatalog.extraHourCost,
+      })
+      .from(eventLabor)
+      .innerJoin(laborCatalog, eq(laborCatalog.id, eventLabor.laborCatalogId))
+      .where(eq(eventLabor.eventId, eventId)),
+    db
+      .select({
+        quantity: eventMaterials.quantity,
+        defaultCost: materialCatalog.defaultCost,
+      })
+      .from(eventMaterials)
+      .innerJoin(
+        materialCatalog,
+        eq(materialCatalog.id, eventMaterials.materialCatalogId),
+      )
+      .where(eq(eventMaterials.eventId, eventId)),
+  ]);
 
-    let totalCostDrinks = 0;
+  let totalCostDrinks = 0;
 
-    if (eventDrinkRows.length > 0) {
-      const drinksPerType = event.totalDrinks / eventDrinkRows.length;
-      const drinkIds = eventDrinkRows.map((r) => r.drinkId);
+  if (eventDrinkRows.length > 0) {
+    const drinksPerType = event.totalDrinks / eventDrinkRows.length;
+    const drinkIds = eventDrinkRows.map((r) => r.drinkId);
 
-      const recipeRows = await tx
-        .select({
-          ingredientId: drinkIngredients.ingredientId,
-          quantity: drinkIngredients.quantity,
-          purchaseCost: ingredients.purchaseCost,
-          yieldQuantity: ingredients.yieldQuantity,
-        })
-        .from(drinkIngredients)
-        .innerJoin(
-          ingredients,
-          eq(ingredients.id, drinkIngredients.ingredientId),
-        )
-        .where(inArray(drinkIngredients.drinkId, drinkIds));
+    const recipeRows = await db
+      .select({
+        ingredientId: drinkIngredients.ingredientId,
+        quantity: drinkIngredients.quantity,
+        purchaseCost: ingredients.purchaseCost,
+        yieldQuantity: ingredients.yieldQuantity,
+      })
+      .from(drinkIngredients)
+      .innerJoin(
+        ingredients,
+        eq(ingredients.id, drinkIngredients.ingredientId),
+      )
+      .where(inArray(drinkIngredients.drinkId, drinkIds));
 
-      const ingredientTotals = new Map<
-        number,
-        { purchaseCost: number; yieldQuantity: number; totalNeeded: number }
-      >();
+    const ingredientTotals = new Map<
+      number,
+      { purchaseCost: number; yieldQuantity: number; totalNeeded: number }
+    >();
 
-      for (const row of recipeRows) {
-        const needed = Number(row.quantity) * drinksPerType;
-        const existing = ingredientTotals.get(row.ingredientId);
-        if (existing) {
-          existing.totalNeeded += needed;
-        } else {
-          ingredientTotals.set(row.ingredientId, {
-            purchaseCost: Number(row.purchaseCost),
-            yieldQuantity: Number(row.yieldQuantity),
-            totalNeeded: needed,
-          });
-        }
-      }
-
-      for (const ing of ingredientTotals.values()) {
-        totalCostDrinks +=
-          Math.ceil(ing.totalNeeded / ing.yieldQuantity) * ing.purchaseCost;
+    for (const row of recipeRows) {
+      const needed = Number(row.quantity) * drinksPerType;
+      const existing = ingredientTotals.get(row.ingredientId);
+      if (existing) {
+        existing.totalNeeded += needed;
+      } else {
+        ingredientTotals.set(row.ingredientId, {
+          purchaseCost: Number(row.purchaseCost),
+          yieldQuantity: Number(row.yieldQuantity),
+          totalNeeded: needed,
+        });
       }
     }
 
-    const totalCostLabor = laborRows.reduce((acc, item) => {
-      const extraHours = Math.max(0, event.durationHours - item.baseHours);
-      return (
-        acc +
-        Number(item.quantity) *
-          (Number(item.baseCost) + extraHours * Number(item.extraHourCost))
-      );
-    }, 0);
+    for (const ing of ingredientTotals.values()) {
+      totalCostDrinks +=
+        Math.ceil(ing.totalNeeded / ing.yieldQuantity) * ing.purchaseCost;
+    }
+  }
 
-    const totalCostMaterials = materialRows.reduce(
-      (acc, item) => acc + Number(item.quantity) * Number(item.defaultCost),
-      0,
+  const totalCostLabor = laborRows.reduce((acc, item) => {
+    const extraHours = Math.max(0, event.durationHours - item.baseHours);
+    return (
+      acc +
+      Number(item.quantity) *
+        (Number(item.baseCost) + extraHours * Number(item.extraHourCost))
     );
+  }, 0);
 
-    const grandTotal = totalCostDrinks + totalCostLabor + totalCostMaterials;
+  const totalCostMaterials = materialRows.reduce(
+    (acc, item) => acc + Number(item.quantity) * Number(item.defaultCost),
+    0,
+  );
 
-    return { totalCostDrinks, totalCostLabor, totalCostMaterials, grandTotal };
-  });
+  const grandTotal = totalCostDrinks + totalCostLabor + totalCostMaterials;
+
+  return { totalCostDrinks, totalCostLabor, totalCostMaterials, grandTotal };
 };
 
 export const addDrinkToEvent = async (

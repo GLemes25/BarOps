@@ -70,27 +70,28 @@ export const createDrink = async (
   values: DrinkInput,
 ): Promise<ActionResult<{ id: number }>> => {
   try {
-    const result = await db.transaction(async (tx) => {
-      const [drink] = await tx
-        .insert(drinks)
-        .values({ name: values.name })
-        .returning({ id: drinks.id });
+    const [drink] = await db
+      .insert(drinks)
+      .values({ name: values.name })
+      .returning({ id: drinks.id });
 
-      if (values.ingredients.length > 0) {
-        await tx.insert(drinkIngredients).values(
+    if (values.ingredients.length > 0) {
+      try {
+        await db.insert(drinkIngredients).values(
           values.ingredients.map((ing) => ({
             drinkId: drink.id,
             ingredientId: ing.ingredientId,
             quantity: String(ing.quantity),
           })),
         );
+      } catch (error) {
+        await db.delete(drinks).where(eq(drinks.id, drink.id));
+        throw error;
       }
-
-      return drink;
-    });
+    }
 
     revalidatePath("/drinks");
-    return { success: true, data: { id: result.id } };
+    return { success: true, data: { id: drink.id } };
   } catch (error) {
     return { success: false, error: String(error) };
   }
@@ -101,20 +102,18 @@ export const updateDrink = async (
   values: DrinkInput,
 ): Promise<ActionResult> => {
   try {
-    await db.transaction(async (tx) => {
-      await tx.update(drinks).set({ name: values.name }).where(eq(drinks.id, id));
-      await tx.delete(drinkIngredients).where(eq(drinkIngredients.drinkId, id));
+    await db.update(drinks).set({ name: values.name }).where(eq(drinks.id, id));
+    await db.delete(drinkIngredients).where(eq(drinkIngredients.drinkId, id));
 
-      if (values.ingredients.length > 0) {
-        await tx.insert(drinkIngredients).values(
-          values.ingredients.map((ing) => ({
-            drinkId: id,
-            ingredientId: ing.ingredientId,
-            quantity: String(ing.quantity),
-          })),
-        );
-      }
-    });
+    if (values.ingredients.length > 0) {
+      await db.insert(drinkIngredients).values(
+        values.ingredients.map((ing) => ({
+          drinkId: id,
+          ingredientId: ing.ingredientId,
+          quantity: String(ing.quantity),
+        })),
+      );
+    }
 
     revalidatePath("/drinks");
     return { success: true };
