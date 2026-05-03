@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   CalendarDays,
@@ -22,7 +23,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 type NavItem = {
   label: string;
   href: string;
@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
 
 export const AppSidebar = () => {
   const pathname = usePathname();
-
+  const { setOpenMobile } = useSidebar();
   return (
     <Sidebar>
       <SidebarHeader className="px-4 py-5">
@@ -67,6 +67,7 @@ export const AppSidebar = () => {
                   <SidebarMenuButton
                     isActive={pathname === href}
                     render={<Link href={href} />}
+                    onClick={() => setOpenMobile(false)}
                   >
                     <Icon />
                     <span>{label}</span>
