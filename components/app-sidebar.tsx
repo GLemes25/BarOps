@@ -19,6 +19,7 @@ import {
   Package,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -43,9 +44,18 @@ export const AppSidebar = () => {
   return (
     <Sidebar>
       <SidebarHeader className="px-4 py-5">
-        <span className="text-lg font-semibold text-sidebar-foreground">
-          BarOps
-        </span>
+        <div className="flex items-center gap-2">
+          <Image
+            src="/icon.svg"
+            alt="Logo BarOps"
+            width={24}
+            height={24}
+            className="shrink-0"
+          />
+          <span className="text-lg font-semibold text-sidebar-foreground">
+            BarOps
+          </span>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

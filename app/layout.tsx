@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { Providers } from "@/components/providers";
+import { TopHeader } from "@/components/top-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -68,7 +69,12 @@ export default function RootLayout({
         <Providers>
           <SidebarProvider>
             <AppSidebar />
-            <main className="flex-1 flex flex-col">{children}</main>
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <TopHeader />
+              <main className="flex-1 overflow-y-auto bg-muted/20">
+                {children}
+              </main>
+            </div>
           </SidebarProvider>
         </Providers>
       </body>
