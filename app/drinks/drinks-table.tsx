@@ -50,7 +50,7 @@ export function DrinksTable({ initialData, availableIngredients }: Props) {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         title="Bebidas"
         dialogTitle="Nova Bebida"
@@ -62,49 +62,51 @@ export function DrinksTable({ initialData, availableIngredients }: Props) {
         )}
       />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Receita</TableHead>
-            <TableHead className="w-16">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {drinks.length === 0 ? (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell
-                colSpan={3}
-                className="text-center text-muted-foreground"
-              >
-                Nenhuma bebida cadastrada.
-              </TableCell>
+              <TableHead className="whitespace-nowrap">Nome</TableHead>
+              <TableHead>Receita</TableHead>
+              <TableHead className="w-16 whitespace-nowrap">Ações</TableHead>
             </TableRow>
-          ) : (
-            drinks.map((drink) => (
-              <TableRow key={drink.id}>
-                <TableCell>{drink.name}</TableCell>
-                <TableCell>
-                  {drink.ingredients.length === 0
-                    ? "—"
-                    : drink.ingredients
-                        .map((ing) => `${ing.name} (${ing.quantity}${ing.recipeUnit})`)
-                        .join(", ")}
-                </TableCell>
-                <TableCell>
-                  <TableRowActions
-                    onEdit={() => handleEdit(drink)}
-                    onDelete={() => handleDelete(drink.id)}
-                  />
+          </TableHeader>
+          <TableBody>
+            {drinks.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  className="text-center text-muted-foreground"
+                >
+                  Nenhuma bebida cadastrada.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              drinks.map((drink) => (
+                <TableRow key={drink.id}>
+                  <TableCell className="whitespace-nowrap">{drink.name}</TableCell>
+                  <TableCell>
+                    {drink.ingredients.length === 0
+                      ? "—"
+                      : drink.ingredients
+                          .map((ing) => `${ing.name} (${ing.quantity}${ing.recipeUnit})`)
+                          .join(", ")}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <TableRowActions
+                      onEdit={() => handleEdit(drink)}
+                      onDelete={() => handleDelete(drink.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[425px] md:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar Bebida</DialogTitle>
           </DialogHeader>

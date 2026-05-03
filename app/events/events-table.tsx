@@ -60,7 +60,7 @@ export function EventsTable({ initialData }: Props) {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         title="Eventos"
         dialogTitle="Novo Evento"
@@ -69,58 +69,60 @@ export function EventsTable({ initialData }: Props) {
         )}
       />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Data</TableHead>
-            <TableHead>Convidados</TableHead>
-            <TableHead>Duração</TableHead>
-            <TableHead>Drinks/pessoa</TableHead>
-            <TableHead>Total Drinks</TableHead>
-            <TableHead className="w-16">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {events.length === 0 ? (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell
-                colSpan={7}
-                className="text-center text-muted-foreground"
-              >
-                Nenhum evento cadastrado.
-              </TableCell>
+              <TableHead>Nome</TableHead>
+              <TableHead className="whitespace-nowrap">Data</TableHead>
+              <TableHead className="whitespace-nowrap">Convidados</TableHead>
+              <TableHead className="whitespace-nowrap">Duração</TableHead>
+              <TableHead className="whitespace-nowrap">Drinks/pessoa</TableHead>
+              <TableHead className="whitespace-nowrap">Total Drinks</TableHead>
+              <TableHead className="w-16 whitespace-nowrap">Ações</TableHead>
             </TableRow>
-          ) : (
-            events.map((event) => (
-              <TableRow key={event.id}>
-                <TableCell>
-                  <Link
-                    href={`/events/${event.id}`}
-                    className="hover:underline font-medium"
-                  >
-                    {event.name}
-                  </Link>
-                </TableCell>
-                <TableCell>{dayjs(event.date).format("DD/MM/YYYY")}</TableCell>
-                <TableCell>{event.guests}</TableCell>
-                <TableCell>{event.durationHours}h</TableCell>
-                <TableCell>{event.avgDrinksPerPerson}</TableCell>
-                <TableCell>{event.totalDrinks}</TableCell>
-                <TableCell>
-                  <TableRowActions
-                    onEdit={() => handleEdit(event)}
-                    onDelete={() => handleDelete(event.id)}
-                  />
+          </TableHeader>
+          <TableBody>
+            {events.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground"
+                >
+                  Nenhum evento cadastrado.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              events.map((event) => (
+                <TableRow key={event.id}>
+                  <TableCell>
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="hover:underline font-medium"
+                    >
+                      {event.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{dayjs(event.date).format("DD/MM/YYYY")}</TableCell>
+                  <TableCell className="whitespace-nowrap">{event.guests}</TableCell>
+                  <TableCell className="whitespace-nowrap">{event.durationHours}h</TableCell>
+                  <TableCell className="whitespace-nowrap">{event.avgDrinksPerPerson}</TableCell>
+                  <TableCell className="whitespace-nowrap">{event.totalDrinks}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <TableRowActions
+                      onEdit={() => handleEdit(event)}
+                      onDelete={() => handleDelete(event.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[425px] md:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar Evento</DialogTitle>
           </DialogHeader>

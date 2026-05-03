@@ -49,7 +49,7 @@ export function IngredientsTable({ initialData }: Props) {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         title="Ingredientes"
         dialogTitle="Novo Ingrediente"
@@ -64,80 +64,82 @@ export function IngredientsTable({ initialData }: Props) {
         )}
       />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Un. Receita</TableHead>
-            <TableHead>Un. Compra</TableHead>
-            <TableHead>Custo de Compra</TableHead>
-            <TableHead>Fator Rendimento</TableHead>
-            <TableHead>Custo/Un. Receita</TableHead>
-            <TableHead className="w-16">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {ingredients.length === 0 ? (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell
-                colSpan={7}
-                className="text-center text-muted-foreground"
-              >
-                Nenhum ingrediente cadastrado.
-              </TableCell>
+              <TableHead>Nome</TableHead>
+              <TableHead className="whitespace-nowrap">Un. Receita</TableHead>
+              <TableHead className="whitespace-nowrap">Un. Compra</TableHead>
+              <TableHead className="whitespace-nowrap">Custo de Compra</TableHead>
+              <TableHead className="whitespace-nowrap">Fator Rendimento</TableHead>
+              <TableHead className="whitespace-nowrap">Custo/Un. Receita</TableHead>
+              <TableHead className="w-16 whitespace-nowrap">Ações</TableHead>
             </TableRow>
-          ) : (
-            ingredients.map((ingredient) => (
-              <TableRow key={ingredient.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {ingredient.name}
-                    {ingredient.isSubRecipe && (
-                      <Badge variant="secondary">Pre-Batch</Badge>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>{ingredient.recipeUnit}</TableCell>
-                <TableCell>{ingredient.purchaseUnit ?? "—"}</TableCell>
-                <TableCell>
-                  {ingredient.purchaseCost !== null
-                    ? ingredient.purchaseCost.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })
-                    : "—"}
-                </TableCell>
-                <TableCell>
-                  {ingredient.yieldQuantity} {ingredient.recipeUnit}
-                  {ingredient.purchaseUnit ? `/${ingredient.purchaseUnit}` : ""}
-                </TableCell>
-                <TableCell>
-                  {ingredient.purchaseCost !== null &&
-                  ingredient.yieldQuantity > 0
-                    ? (
-                        ingredient.purchaseCost / ingredient.yieldQuantity
-                      ).toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 4,
-                      }) + `/${ingredient.recipeUnit}`
-                    : "—"}
-                </TableCell>
-                <TableCell>
-                  <TableRowActions
-                    onEdit={() => handleEdit(ingredient)}
-                    onDelete={() => handleDelete(ingredient.id)}
-                  />
+          </TableHeader>
+          <TableBody>
+            {ingredients.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground"
+                >
+                  Nenhum ingrediente cadastrado.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              ingredients.map((ingredient) => (
+                <TableRow key={ingredient.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {ingredient.name}
+                      {ingredient.isSubRecipe && (
+                        <Badge variant="secondary">Pre-Batch</Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{ingredient.recipeUnit}</TableCell>
+                  <TableCell className="whitespace-nowrap">{ingredient.purchaseUnit ?? "—"}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {ingredient.purchaseCost !== null
+                      ? ingredient.purchaseCost.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {ingredient.yieldQuantity} {ingredient.recipeUnit}
+                    {ingredient.purchaseUnit ? `/${ingredient.purchaseUnit}` : ""}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {ingredient.purchaseCost !== null &&
+                    ingredient.yieldQuantity > 0
+                      ? (
+                          ingredient.purchaseCost / ingredient.yieldQuantity
+                        ).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        }) + `/${ingredient.recipeUnit}`
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <TableRowActions
+                      onEdit={() => handleEdit(ingredient)}
+                      onDelete={() => handleDelete(ingredient.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[425px] md:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar Ingrediente</DialogTitle>
           </DialogHeader>

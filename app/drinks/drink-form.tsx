@@ -118,7 +118,7 @@ export const DrinkForm = ({
         <div className="flex flex-col gap-2">
           <FormLabel>Receita</FormLabel>
           {fields.map((field, index) => (
-            <div key={field.id} className="flex gap-2 items-start">
+            <div key={field.id} className="flex flex-col sm:flex-row gap-2 items-start">
               <FormField
                 control={form.control}
                 name={`ingredients.${index}.ingredientId`}

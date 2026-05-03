@@ -50,7 +50,7 @@ export function MaterialsTable({ initialData }: Props) {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         title="Materiais"
         dialogTitle="Novo Material"
@@ -59,48 +59,50 @@ export function MaterialsTable({ initialData }: Props) {
         )}
       />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Valor Unitário</TableHead>
-            <TableHead className="w-16">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {materials.length === 0 ? (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell
-                colSpan={3}
-                className="text-center text-muted-foreground"
-              >
-                Nenhum material cadastrado.
-              </TableCell>
+              <TableHead>Nome</TableHead>
+              <TableHead className="whitespace-nowrap">Valor Unitário</TableHead>
+              <TableHead className="w-16 whitespace-nowrap">Ações</TableHead>
             </TableRow>
-          ) : (
-            materials.map((material) => (
-              <TableRow key={material.id}>
-                <TableCell>{material.name}</TableCell>
-                <TableCell>
-                  {material.defaultCost.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </TableCell>
-                <TableCell>
-                  <TableRowActions
-                    onEdit={() => handleEdit(material)}
-                    onDelete={() => handleDelete(material.id)}
-                  />
+          </TableHeader>
+          <TableBody>
+            {materials.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  className="text-center text-muted-foreground"
+                >
+                  Nenhum material cadastrado.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              materials.map((material) => (
+                <TableRow key={material.id}>
+                  <TableCell>{material.name}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {material.defaultCost.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <TableRowActions
+                      onEdit={() => handleEdit(material)}
+                      onDelete={() => handleDelete(material.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[425px] md:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar Material</DialogTitle>
           </DialogHeader>
