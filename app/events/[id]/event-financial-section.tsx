@@ -1,12 +1,21 @@
 "use client";
 
 import type { ShoppingListItem } from "@/actions/event-actions";
+import { updateEventRevenue } from "@/actions/event-actions";
 import type {
   EventLaborWithCatalog,
   EventMaterialWithCatalog,
 } from "@/actions/types";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -16,8 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ShoppingCart } from "lucide-react";
+import { Check, Pencil, X, ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 type Props = {
   labor: EventLaborWithCatalog[];
@@ -36,8 +46,14 @@ export function EventFinancialSection({
   durationHours,
   eventId,
   guests,
-  revenue,
+  revenue: initialRevenue,
 }: Props) {
+  const [revenue, setRevenue] = useState(initialRevenue);
+  const [editing, setEditing] = useState(false);
+  const [revenueType, setRevenueType] = useState<"total" | "per_person">("total");
+  const [inputValue, setInputValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const formatCurrency = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -62,6 +78,33 @@ export function EventFinancialSection({
   const costPerPerson = guests > 0 ? grandTotal / guests : 0;
   const profit = revenue - grandTotal;
   const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+  const revenuePerPerson = guests > 0 ? revenue / guests : 0;
+
+  const handleEditOpen = () => {
+    setRevenueType("total");
+    setInputValue(String(revenue));
+    setEditing(true);
+  };
+
+  const handleCancel = () => {
+    setEditing(false);
+  };
+
+  const handleSave = async () => {
+    const parsed = parseFloat(inputValue.replace(",", "."));
+    if (isNaN(parsed) || parsed < 0) return;
+
+    const finalRevenue = revenueType === "per_person" ? parsed * guests : parsed;
+
+    setSaving(true);
+    const result = await updateEventRevenue(eventId, finalRevenue);
+    setSaving(false);
+
+    if (result.success) {
+      setRevenue(finalRevenue);
+      setEditing(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -73,7 +116,7 @@ export function EventFinancialSection({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{formatCurrency(laborCost)}</p>
+            <p className="text-xl font-bold">{formatCurrency(laborCost)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -83,9 +126,7 @@ export function EventFinancialSection({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
-              {formatCurrency(materialsCost)}
-            </p>
+            <p className="text-xl font-bold">{formatCurrency(materialsCost)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -95,7 +136,7 @@ export function EventFinancialSection({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="text-xl font-bold">
               {formatCurrency(ingredientsCost)}
             </p>
           </CardContent>
@@ -107,19 +148,90 @@ export function EventFinancialSection({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-xl font-bold">
               {formatCurrency(costPerPerson)}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Receita Total (Cobrado)
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Valor Acertado
+              </CardTitle>
+              {!editing && (
+                <button
+                  onClick={handleEditOpen}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <CardDescription>
+              {formatCurrency(revenuePerPerson)} / pessoa
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{formatCurrency(revenue)}</p>
+            {editing ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setRevenueType("total")}
+                    className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                      revenueType === "total"
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Total
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRevenueType("per_person")}
+                    className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                      revenueType === "per_person"
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Por pessoa
+                  </button>
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="h-8 text-sm"
+                  autoFocus
+                />
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    className="h-7 px-2 text-xs flex-1"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    <Check className="h-3 w-3 mr-1" />
+                    {saving ? "..." : "Salvar"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs"
+                    onClick={handleCancel}
+                    disabled={saving}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xl font-bold">{formatCurrency(revenue)}</p>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -130,7 +242,9 @@ export function EventFinancialSection({
             <CardDescription>{margin.toFixed(1)}% de margem</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
+            <p
+              className={`text-xl font-bold ${profit >= 0 ? "text-green-600" : "text-red-600"}`}
+            >
               {formatCurrency(profit)}
             </p>
           </CardContent>

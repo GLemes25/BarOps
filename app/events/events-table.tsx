@@ -4,13 +4,13 @@ import { deleteEvent } from "@/actions/event-actions";
 import { EventForm } from "@/app/events/event-form";
 import { PageHeader } from "@/components/page-header";
 import { TableRowActions } from "@/components/table-row-actions";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -36,7 +36,10 @@ type EventRecord = {
   revenue: number;
 };
 
-const statusConfig: Record<EventRecord["status"], { label: string; className: string }> = {
+const statusConfig: Record<
+  EventRecord["status"],
+  { label: string; className: string }
+> = {
   planning: { label: "Planejamento", className: "bg-gray-100 text-gray-700" },
   confirmed: { label: "Confirmado", className: "bg-green-100 text-green-700" },
   completed: { label: "Concluído", className: "bg-blue-100 text-blue-700" },
@@ -50,7 +53,9 @@ type Props = {
 export function EventsTable({ initialData }: Props) {
   const router = useRouter();
   const [events, setEvents] = useState<EventRecord[]>(initialData);
-  useEffect(() => { setEvents(initialData); }, [initialData]);
+  useEffect(() => {
+    setEvents(initialData);
+  }, [initialData]);
   const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -75,7 +80,12 @@ export function EventsTable({ initialData }: Props) {
         title="Eventos"
         dialogTitle="Novo Evento"
         dialogContent={(onClose) => (
-          <EventForm onSuccess={() => { onClose(); router.refresh(); }} />
+          <EventForm
+            onSuccess={() => {
+              onClose();
+              router.refresh();
+            }}
+          />
         )}
       />
 
@@ -114,11 +124,21 @@ export function EventsTable({ initialData }: Props) {
                       {event.name}
                     </Link>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{dayjs(event.date).format("DD/MM/YYYY")}</TableCell>
-                  <TableCell className="whitespace-nowrap">{event.guests}</TableCell>
-                  <TableCell className="whitespace-nowrap">{event.durationHours}h</TableCell>
-                  <TableCell className="whitespace-nowrap">{event.avgDrinksPerPerson}</TableCell>
-                  <TableCell className="whitespace-nowrap">{event.totalDrinks}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {dayjs(event.date).format("DD/MM/YYYY")}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {event.guests}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {event.durationHours}h
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {event.avgDrinksPerPerson}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {event.totalDrinks}
+                  </TableCell>
                   <TableCell className="whitespace-nowrap">
                     <Badge className={statusConfig[event.status].className}>
                       {statusConfig[event.status].label}
@@ -138,13 +158,16 @@ export function EventsTable({ initialData }: Props) {
       </div>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[425px] md:max-w-2xl">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-106.25 md:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar Evento</DialogTitle>
           </DialogHeader>
           <EventForm
             record={selectedEvent}
-            onSuccess={() => { setIsEditOpen(false); router.refresh(); }}
+            onSuccess={() => {
+              setIsEditOpen(false);
+              router.refresh();
+            }}
           />
         </DialogContent>
       </Dialog>

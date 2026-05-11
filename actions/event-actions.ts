@@ -412,6 +412,19 @@ export const getEventReport = async (eventId: number): Promise<EventReport> => {
   return { totalCostDrinks, totalCostLabor, totalCostMaterials, grandTotal };
 };
 
+export const updateEventRevenue = async (
+  id: number,
+  revenue: number,
+): Promise<ActionResult> => {
+  try {
+    await db.update(events).set({ revenue: String(revenue) }).where(eq(events.id, id));
+    revalidatePath(`/events/${id}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
 export const addDrinkToEvent = async (
   eventId: number,
   drinkId: number,
