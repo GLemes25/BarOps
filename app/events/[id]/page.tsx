@@ -12,6 +12,7 @@ import { EventDrinksSection } from "./event-drinks-section";
 import { EventFinancialSection } from "./event-financial-section";
 import { EventLaborSection } from "./event-labor-section";
 import { EventMaterialsSection } from "./event-materials-section";
+import { DuplicateEventButton } from "./duplicate-event-button";
 import { ShoppingListSection } from "./shopping-list-section";
 
 dayjs.locale("pt-br");
@@ -54,6 +55,7 @@ const EventDetailPage = async ({ params }: Props) => {
           <Badge variant="secondary">
             {event.guests} convidado{event.guests !== 1 ? "s" : ""}
           </Badge>
+          <DuplicateEventButton eventId={eventId} />
         </div>
         <p className="text-muted-foreground text-sm">
           {dayjs(event.date).format("dddd, D [de] MMMM [de] YYYY")} ·{" "}

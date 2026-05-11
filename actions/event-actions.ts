@@ -412,6 +412,60 @@ export const getEventReport = async (eventId: number): Promise<EventReport> => {
   return { totalCostDrinks, totalCostLabor, totalCostMaterials, grandTotal };
 };
 
+export const duplicateEvent = async (
+  eventId: number,
+): Promise<ActionResult<{ newEventId: number }>> => {
+  try {
+    const [original] = await db.select().from(events).where(eq(events.id, eventId));
+    if (!original) return { success: false, error: "Evento não encontrado." };
+
+    const [newEvent] = await db
+      .insert(events)
+      .values({
+        name: `${original.name} copy`,
+        date: original.date,
+        guests: original.guests,
+        durationHours: original.durationHours,
+        avgDrinksPerPerson: original.avgDrinksPerPerson,
+        totalDrinks: original.totalDrinks,
+        status: "planning",
+        revenue: "0",
+      })
+      .returning({ id: events.id });
+
+    const newEventId = newEvent.id;
+
+    const [laborRows, materialRows, drinkRows] = await Promise.all([
+      db.select().from(eventLabor).where(eq(eventLabor.eventId, eventId)),
+      db.select().from(eventMaterials).where(eq(eventMaterials.eventId, eventId)),
+      db.select().from(eventDrinks).where(eq(eventDrinks.eventId, eventId)),
+    ]);
+
+    if (laborRows.length > 0) {
+      await db.insert(eventLabor).values(
+        laborRows.map(({ laborCatalogId, quantity }) => ({ eventId: newEventId, laborCatalogId, quantity })),
+      );
+    }
+
+    if (materialRows.length > 0) {
+      await db.insert(eventMaterials).values(
+        materialRows.map(({ materialCatalogId, quantity }) => ({ eventId: newEventId, materialCatalogId, quantity })),
+      );
+    }
+
+    if (drinkRows.length > 0) {
+      await db.insert(eventDrinks).values(
+        drinkRows.map(({ drinkId }) => ({ eventId: newEventId, drinkId })),
+      );
+    }
+
+    revalidatePath("/events");
+    return { success: true, data: { newEventId } };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
 export const updateEventRevenue = async (
   id: number,
   revenue: number,

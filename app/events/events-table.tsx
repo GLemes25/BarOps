@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteEvent } from "@/actions/event-actions";
+import { deleteEvent, duplicateEvent } from "@/actions/event-actions";
 import { EventForm } from "@/app/events/event-form";
 import { PageHeader } from "@/components/page-header";
 import { TableRowActions } from "@/components/table-row-actions";
@@ -73,6 +73,33 @@ export function EventsTable({ initialData }: Props) {
       router.refresh();
     }
   };
+
+  const handleDuplicate = async (event: EventRecord) => {
+    const result = await duplicateEvent(event.id);
+    if (!result.success || !result.data) {
+      alert("Não foi possível duplicar o evento.");
+    } else {
+      router.refresh();
+      setSelectedEvent({
+        ...event,
+        id: result.data.newEventId,
+        name: `${event.name} copy`,
+        status: "planning",
+        revenue: 0,
+      });
+      setIsEditOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const editId = new URLSearchParams(window.location.search).get("edit");
+    if (!editId) return;
+    const found = initialData.find((e) => e.id === Number(editId));
+    if (found) {
+      setSelectedEvent(found);
+      setIsEditOpen(true);
+    }
+  }, [initialData]);
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -148,6 +175,7 @@ export function EventsTable({ initialData }: Props) {
                     <TableRowActions
                       onEdit={() => handleEdit(event)}
                       onDelete={() => handleDelete(event.id)}
+                      onDuplicate={() => handleDuplicate(event)}
                     />
                   </TableCell>
                 </TableRow>
