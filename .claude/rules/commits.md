@@ -32,7 +32,11 @@ Use estes commits passados do repositório como seu padrão de tom e estrutura:
 - `refactor: update rules to claude code`
 - `style: remove gradient color to match minimalist design`
 
-## 4. Fluxo de Execução
+## 4. Lembretes
+
+- Não esqueça de incluir todos os arquivos incluindo as tasks e o MarkDown (.md)
+
+## 5. Fluxo de Execução
 
 1. Analise brevemente os arquivos modificados (adicione-os ao _stage_ com `git add .` sempre).
 2. Gere a mensagem de commit apropriada silenciosamente em inglês.

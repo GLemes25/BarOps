@@ -103,6 +103,7 @@ const EventDetailPage = async ({ params }: Props) => {
             shoppingList={shoppingList}
             durationHours={event.durationHours}
             eventId={eventId}
+            guests={event.guests}
           />
         </TabsContent>
       </Tabs>
