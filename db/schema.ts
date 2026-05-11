@@ -19,6 +19,14 @@ export const events = pgTable("events", {
     scale: 2,
   }).notNull(),
   totalDrinks: integer("total_drinks").notNull(),
+  status: text("status", {
+    enum: ["planning", "confirmed", "completed", "canceled"],
+  })
+    .default("planning")
+    .notNull(),
+  revenue: decimal("revenue", { precision: 10, scale: 2 })
+    .default("0")
+    .notNull(),
 });
 
 export const drinks = pgTable("drinks", {
@@ -32,7 +40,10 @@ export const ingredients = pgTable("ingredients", {
   recipeUnit: text("recipe_unit").notNull(),
   purchaseUnit: text("purchase_unit"),
   purchaseCost: decimal("purchase_cost", { precision: 10, scale: 2 }),
-  yieldQuantity: decimal("yield_quantity", { precision: 10, scale: 4 }).notNull(),
+  yieldQuantity: decimal("yield_quantity", {
+    precision: 10,
+    scale: 4,
+  }).notNull(),
   isSubRecipe: boolean("is_sub_recipe").default(false).notNull(),
 });
 
@@ -63,7 +74,10 @@ export const laborCatalog = pgTable("labor_catalog", {
   role: text("role").notNull(),
   baseCost: decimal("base_cost", { precision: 10, scale: 2 }).notNull(),
   baseHours: integer("base_hours").notNull(),
-  extraHourCost: decimal("extra_hour_cost", { precision: 10, scale: 2 }).notNull(),
+  extraHourCost: decimal("extra_hour_cost", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
 });
 
 export const materialCatalog = pgTable("material_catalog", {

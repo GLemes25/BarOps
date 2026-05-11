@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -31,6 +32,15 @@ type EventRecord = {
   durationHours: number;
   avgDrinksPerPerson: number;
   totalDrinks: number;
+  status: "planning" | "confirmed" | "completed" | "canceled";
+  revenue: number;
+};
+
+const statusConfig: Record<EventRecord["status"], { label: string; className: string }> = {
+  planning: { label: "Planejamento", className: "bg-gray-100 text-gray-700" },
+  confirmed: { label: "Confirmado", className: "bg-green-100 text-green-700" },
+  completed: { label: "Concluído", className: "bg-blue-100 text-blue-700" },
+  canceled: { label: "Cancelado", className: "bg-red-100 text-red-700" },
 };
 
 type Props = {
@@ -79,6 +89,7 @@ export function EventsTable({ initialData }: Props) {
               <TableHead className="whitespace-nowrap">Duração</TableHead>
               <TableHead className="whitespace-nowrap">Drinks/pessoa</TableHead>
               <TableHead className="whitespace-nowrap">Total Drinks</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
               <TableHead className="w-16 whitespace-nowrap">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -86,7 +97,7 @@ export function EventsTable({ initialData }: Props) {
             {events.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center text-muted-foreground"
                 >
                   Nenhum evento cadastrado.
@@ -108,6 +119,11 @@ export function EventsTable({ initialData }: Props) {
                   <TableCell className="whitespace-nowrap">{event.durationHours}h</TableCell>
                   <TableCell className="whitespace-nowrap">{event.avgDrinksPerPerson}</TableCell>
                   <TableCell className="whitespace-nowrap">{event.totalDrinks}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Badge className={statusConfig[event.status].className}>
+                      {statusConfig[event.status].label}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="whitespace-nowrap">
                     <TableRowActions
                       onEdit={() => handleEdit(event)}

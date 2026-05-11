@@ -6,7 +6,7 @@ import type {
   EventMaterialWithCatalog,
 } from "@/actions/types";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -26,6 +26,7 @@ type Props = {
   durationHours: number;
   eventId: number;
   guests: number;
+  revenue: number;
 };
 
 export function EventFinancialSection({
@@ -35,6 +36,7 @@ export function EventFinancialSection({
   durationHours,
   eventId,
   guests,
+  revenue,
 }: Props) {
   const formatCurrency = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -58,10 +60,12 @@ export function EventFinancialSection({
 
   const grandTotal = laborCost + materialsCost + ingredientsCost;
   const costPerPerson = guests > 0 ? grandTotal / guests : 0;
+  const profit = revenue - grandTotal;
+  const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -105,6 +109,29 @@ export function EventFinancialSection({
           <CardContent>
             <p className="text-2xl font-bold text-primary">
               {formatCurrency(costPerPerson)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Receita Total (Cobrado)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatCurrency(revenue)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Lucro Líquido
+            </CardTitle>
+            <CardDescription>{margin.toFixed(1)}% de margem</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
+              {formatCurrency(profit)}
             </p>
           </CardContent>
         </Card>

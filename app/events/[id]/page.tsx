@@ -104,6 +104,7 @@ const EventDetailPage = async ({ params }: Props) => {
             durationHours={event.durationHours}
             eventId={eventId}
             guests={event.guests}
+            revenue={Number(event.revenue)}
           />
         </TabsContent>
       </Tabs>

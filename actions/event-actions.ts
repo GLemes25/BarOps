@@ -42,6 +42,8 @@ type EventInput = {
   guests: number;
   durationHours: number;
   avgDrinksPerPerson: number;
+  status: "planning" | "confirmed" | "completed" | "canceled";
+  revenue: number;
 };
 
 export const getEvents = async () => {
@@ -50,6 +52,7 @@ export const getEvents = async () => {
     ...row,
     date: row.date.toISOString(),
     avgDrinksPerPerson: Number(row.avgDrinksPerPerson),
+    revenue: Number(row.revenue),
   }));
 };
 
@@ -80,6 +83,8 @@ export const createEvent = async (
         durationHours: values.durationHours,
         avgDrinksPerPerson: String(values.avgDrinksPerPerson),
         totalDrinks,
+        status: values.status,
+        revenue: String(values.revenue),
       })
       .returning({ id: events.id });
     revalidatePath("/events");
@@ -104,6 +109,8 @@ export const updateEvent = async (
         durationHours: values.durationHours,
         avgDrinksPerPerson: String(values.avgDrinksPerPerson),
         totalDrinks,
+        status: values.status,
+        revenue: String(values.revenue),
       })
       .where(eq(events.id, id));
     revalidatePath("/events");
