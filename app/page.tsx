@@ -41,7 +41,7 @@ const DashboardPage = async () => {
           <CardContent>
             <p className="text-2xl font-bold text-foreground">{totalEvents}</p>
             <CardDescription className="mt-1">
-              eventos cadastrados
+              Eventos cadastrados
             </CardDescription>
           </CardContent>
         </Card>
@@ -58,7 +58,7 @@ const DashboardPage = async () => {
               {formattedRevenue}
             </p>
             <CardDescription className="mt-1">
-              soma dos custos dos eventos
+              Soma dos custos dos eventos
             </CardDescription>
           </CardContent>
         </Card>

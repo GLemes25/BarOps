@@ -438,6 +438,19 @@ export const addDrinkToEvent = async (
   }
 };
 
+export const addDrinksToEvent = async (
+  eventId: number,
+  drinkIds: number[],
+): Promise<ActionResult> => {
+  try {
+    await db.insert(eventDrinks).values(drinkIds.map((drinkId) => ({ eventId, drinkId })));
+    revalidatePath(`/events/${eventId}`);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+};
+
 export const removeDrinkFromEvent = async (
   eventId: number,
   drinkId: number,

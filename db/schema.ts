@@ -1,4 +1,5 @@
 import {
+  AnyPgColumn,
   boolean,
   decimal,
   integer,
@@ -32,6 +33,7 @@ export const events = pgTable("events", {
 export const drinks = pgTable("drinks", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  parentId: integer("parent_id").references((): AnyPgColumn => drinks.id),
 });
 
 export const ingredients = pgTable("ingredients", {

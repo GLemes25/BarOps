@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EventDrinkForm } from "./event-drink-form";
 
-type DrinkOption = { id: number; name: string };
+type DrinkOption = { id: number; name: string; variants: { id: number; name: string }[] };
 
 type Props = {
   drinks: EventDrinkItem[];

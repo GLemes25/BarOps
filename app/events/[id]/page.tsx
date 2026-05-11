@@ -75,10 +75,9 @@ const EventDetailPage = async ({ params }: Props) => {
             drinks={eventDrinks}
             totalDrinks={event.totalDrinks}
             eventId={eventId}
-            availableDrinks={drinksCatalog.map((d) => ({
-              id: d.id,
-              name: d.name,
-            }))}
+            availableDrinks={drinksCatalog
+              .filter((d) => d.parentId === null)
+              .map((d) => ({ id: d.id, name: d.name, variants: d.variants }))}
           />
         </TabsContent>
 

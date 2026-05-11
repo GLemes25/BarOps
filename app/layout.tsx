@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { Providers } from "@/components/providers";
 import { TopHeader } from "@/components/top-header";
+import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -67,6 +68,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>
+          <Toaster richColors />
           <SidebarProvider>
             <AppSidebar />
             <div className="flex flex-1 flex-col overflow-hidden">
