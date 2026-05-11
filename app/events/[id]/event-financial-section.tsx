@@ -6,7 +6,6 @@ import type {
   EventLaborWithCatalog,
   EventMaterialWithCatalog,
 } from "@/actions/types";
-import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,8 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Check, Pencil, X, ShoppingCart } from "lucide-react";
-import Link from "next/link";
+import { Check, Pencil, X } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
@@ -275,22 +273,8 @@ export function EventFinancialSection({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <span className="whitespace-nowrap">
-                    Ingredientes (Lista de Compras)
-                  </span>
-                  <Link
-                    href={`/events/${eventId}/shopping-list`}
-                    className={buttonVariants({
-                      variant: "outline",
-                      size: "sm",
-                    })}
-                  >
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Ver Lista de Compras
-                  </Link>
-                </div>
+              <TableCell className="whitespace-nowrap">
+                Ingredientes (Lista de Compras)
               </TableCell>
               <TableCell className="text-right whitespace-nowrap">
                 {formatCurrency(ingredientsCost)}

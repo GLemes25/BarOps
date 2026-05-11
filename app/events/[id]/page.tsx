@@ -1,18 +1,10 @@
-import {
-  getEventDrinks,
-  getEventShoppingList,
-} from "@/actions/event-actions";
-import { getEventById } from "@/actions/get-event-by-id";
 import { getDrinks } from "@/actions/drink-actions";
+import { getEventDrinks, getEventShoppingList } from "@/actions/event-actions";
+import { getEventById } from "@/actions/get-event-by-id";
 import { getLabor } from "@/actions/labor-actions";
 import { getMaterials } from "@/actions/material-actions";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
 import { notFound } from "next/navigation";
@@ -20,6 +12,7 @@ import { EventDrinksSection } from "./event-drinks-section";
 import { EventFinancialSection } from "./event-financial-section";
 import { EventLaborSection } from "./event-labor-section";
 import { EventMaterialsSection } from "./event-materials-section";
+import { ShoppingListSection } from "./shopping-list-section";
 
 dayjs.locale("pt-br");
 
@@ -33,15 +26,21 @@ const EventDetailPage = async ({ params }: Props) => {
 
   if (isNaN(eventId)) notFound();
 
-  const [eventResult, eventDrinks, shoppingList, drinksCatalog, laborCatalog, materialsCatalog] =
-    await Promise.all([
-      getEventById(eventId),
-      getEventDrinks(eventId),
-      getEventShoppingList(eventId),
-      getDrinks(),
-      getLabor(),
-      getMaterials(),
-    ]);
+  const [
+    eventResult,
+    eventDrinks,
+    shoppingList,
+    drinksCatalog,
+    laborCatalog,
+    materialsCatalog,
+  ] = await Promise.all([
+    getEventById(eventId),
+    getEventDrinks(eventId),
+    getEventShoppingList(eventId),
+    getDrinks(),
+    getLabor(),
+    getMaterials(),
+  ]);
 
   if (!eventResult.success || !eventResult.data) notFound();
 
@@ -67,6 +66,7 @@ const EventDetailPage = async ({ params }: Props) => {
           <TabsTrigger value="drinks">Drinks</TabsTrigger>
           <TabsTrigger value="equipe">Equipe</TabsTrigger>
           <TabsTrigger value="materiais">Materiais</TabsTrigger>
+          <TabsTrigger value="compras">Lista de Compras</TabsTrigger>
           <TabsTrigger value="financeiro">Resumo Financeiro</TabsTrigger>
         </TabsList>
 
@@ -75,7 +75,10 @@ const EventDetailPage = async ({ params }: Props) => {
             drinks={eventDrinks}
             totalDrinks={event.totalDrinks}
             eventId={eventId}
-            availableDrinks={drinksCatalog.map((d) => ({ id: d.id, name: d.name }))}
+            availableDrinks={drinksCatalog.map((d) => ({
+              id: d.id,
+              name: d.name,
+            }))}
           />
         </TabsContent>
 
@@ -84,7 +87,10 @@ const EventDetailPage = async ({ params }: Props) => {
             labor={event.labor}
             durationHours={event.durationHours}
             eventId={eventId}
-            availableLabor={laborCatalog.map((l) => ({ id: l.id, role: l.role }))}
+            availableLabor={laborCatalog.map((l) => ({
+              id: l.id,
+              role: l.role,
+            }))}
           />
         </TabsContent>
 
@@ -92,10 +98,15 @@ const EventDetailPage = async ({ params }: Props) => {
           <EventMaterialsSection
             materials={event.materials}
             eventId={eventId}
-            availableMaterials={materialsCatalog.map((m) => ({ id: m.id, name: m.name }))}
+            availableMaterials={materialsCatalog.map((m) => ({
+              id: m.id,
+              name: m.name,
+            }))}
           />
         </TabsContent>
-
+        <TabsContent className="mt-4" value="compras">
+          <ShoppingListSection event={event} shoppingList={shoppingList} />
+        </TabsContent>
         <TabsContent value="financeiro" className="mt-4">
           <EventFinancialSection
             labor={event.labor}

@@ -35,6 +35,7 @@ Use estes commits passados do repositório como seu padrão de tom e estrutura:
 ## 4. Lembretes
 
 - Não esqueça de incluir todos os arquivos incluindo as tasks e o MarkDown (.md)
+- **Nunca faça commit automaticamente.** Sempre aguarde o usuário pedir explicitamente antes de executar qualquer `git commit`.
 
 ## 5. Fluxo de Execução
 

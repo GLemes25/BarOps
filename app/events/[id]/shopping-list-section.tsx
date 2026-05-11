@@ -1,57 +1,26 @@
-import { getEventShoppingList } from "@/actions/event-actions";
-import { getEventById } from "@/actions/get-event-by-id";
-import { buttonVariants } from "@/components/ui/button";
+import type { ShoppingListItem } from "@/actions/event-actions";
+import type { EventWithRelations } from "@/actions/types";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import { PrintButton } from "./print-button";
 
 dayjs.locale("pt-br");
 
 type Props = {
-  params: Promise<{ id: string }>;
+  event: EventWithRelations;
+  shoppingList: ShoppingListItem[];
 };
 
-const ShoppingListPage = async ({ params }: Props) => {
-  const { id } = await params;
-  const eventId = Number(id);
-
-  if (isNaN(eventId)) notFound();
-
-  const [eventResult, shoppingList] = await Promise.all([
-    getEventById(eventId),
-    getEventShoppingList(eventId),
-  ]);
-
-  // Se der erro, ele vai cuspir o motivo real no terminal do VSCode!
-  if (!eventResult.success || !eventResult.data) {
-    console.error("FALHA NA BUSCA DO EVENTO:", eventResult);
-    notFound();
-  }
-
-  if (!eventResult.success || !eventResult.data) notFound();
-
-  const event = eventResult.data;
-
+export function ShoppingListSection({ event, shoppingList }: Props) {
   const totalCost = shoppingList.reduce(
     (sum, item) => sum + item.estimatedCost,
     0,
   );
 
   return (
-    <div className="max-w-2xl mx-auto p-6 flex flex-col gap-6">
-      <div className="flex items-center justify-between print:hidden">
-        <Link
-          href={`/events/${eventId}`}
-          className={cn(buttonVariants({ variant: "ghost" }))}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar para o Evento
-        </Link>
+    <div className="max-w-2xl mx-auto flex flex-col gap-6">
+      <div className="flex items-center justify-end print:hidden">
         <PrintButton />
       </div>
 
@@ -83,7 +52,7 @@ const ShoppingListPage = async ({ params }: Props) => {
                   {item.quantityToBuy} {item.purchaseUnit}
                 </span>{" "}
                 · Custo:{" "}
-                <span className="font-semibold text-foreground">
+                <span suppressHydrationWarning className="font-semibold text-foreground">
                   {item.estimatedCost.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
@@ -99,7 +68,7 @@ const ShoppingListPage = async ({ params }: Props) => {
 
       <div className="flex justify-between items-center font-semibold text-lg">
         <span>Total Estimado</span>
-        <span>
+        <span suppressHydrationWarning>
           {totalCost.toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
@@ -108,6 +77,4 @@ const ShoppingListPage = async ({ params }: Props) => {
       </div>
     </div>
   );
-};
-
-export default ShoppingListPage;
+}
