@@ -1,10 +1,6 @@
 "use client";
 
 import { createEvent, updateEvent } from "@/actions/event-actions";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
-import { useState } from "react";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,10 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
 
 const eventSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   date: z.string().min(1, "Data é obrigatória"),
+  time: z.string().optional().nullable().or(z.literal("")),
   guests: z.coerce.number().int().positive("Deve ser positivo"),
   durationHours: z.coerce.number().int().positive("Deve ser positivo"),
   avgDrinksPerPerson: z.coerce.number().positive("Deve ser positivo"),
@@ -39,6 +40,7 @@ type EventRecord = {
   id: number;
   name: string;
   date: string;
+  time?: string | null;
   guests: number;
   durationHours: number;
   avgDrinksPerPerson: number;
@@ -59,13 +61,16 @@ const statusOptions = [
 ] as const;
 
 export const EventForm = ({ record, onSuccess }: EventFormProps) => {
-  const [revenueType, setRevenueType] = useState<"total" | "per_person">("total");
+  const [revenueType, setRevenueType] = useState<"total" | "per_person">(
+    "total",
+  );
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema) as Resolver<EventFormValues>,
     defaultValues: {
       name: record?.name ?? "",
-      date: record?.date ?? "",
+      date: record?.date ? record.date.split("T")[0] : "",
+      time: record?.time ?? "",
       guests: record?.guests ?? 1,
       durationHours: record?.durationHours ?? 1,
       avgDrinksPerPerson: record?.avgDrinksPerPerson ?? 1,
@@ -79,9 +84,16 @@ export const EventForm = ({ record, onSuccess }: EventFormProps) => {
   const onSubmit = async (values: EventFormValues) => {
     try {
       const finalRevenue =
-        revenueType === "per_person" ? values.revenue * values.guests : values.revenue;
+        revenueType === "per_person"
+          ? values.revenue * values.guests
+          : values.revenue;
 
-      const payload = { ...values, revenue: finalRevenue };
+      const payload = {
+        ...values,
+        date: values.date + "T12:00:00",
+        time: values.time || null,
+        revenue: finalRevenue,
+      };
 
       if (record?.id) {
         await updateEvent(record.id, payload);
@@ -96,7 +108,10 @@ export const EventForm = ({ record, onSuccess }: EventFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -111,19 +126,41 @@ export const EventForm = ({ record, onSuccess }: EventFormProps) => {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="time"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Horário</FormLabel>
+                <FormControl>
+                  <Input
+                    type="time"
+                    step="60"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value || null)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -177,7 +214,8 @@ export const EventForm = ({ record, onSuccess }: EventFormProps) => {
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o status">
-                      {statusOptions.find((o) => o.value === field.value)?.label ?? "Selecione o status"}
+                      {statusOptions.find((o) => o.value === field.value)
+                        ?.label ?? "Selecione o status"}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
@@ -227,7 +265,11 @@ export const EventForm = ({ record, onSuccess }: EventFormProps) => {
         />
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : record ? "Salvar alterações" : "Criar evento"}
+          {isSubmitting
+            ? "Salvando..."
+            : record
+              ? "Salvar alterações"
+              : "Criar evento"}
         </Button>
       </form>
     </Form>

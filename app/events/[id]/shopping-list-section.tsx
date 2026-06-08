@@ -104,7 +104,8 @@ export function ShoppingListSection({ event, shoppingList }: Props) {
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold">Lista de Compras</h1>
         <p className="text-muted-foreground text-sm">
-          {event.name} · {dayjs(event.date).format("D [de] MMMM [de] YYYY")} ·{" "}
+          {event.name} · {dayjs(event.date).format("D [de] MMMM [de] YYYY")}
+          {event.time && ` · às ${event.time.replace(":", "h")}`} ·{" "}
           {event.guests} convidado{event.guests !== 1 ? "s" : ""}
         </p>
       </div>

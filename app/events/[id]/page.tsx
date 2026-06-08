@@ -13,6 +13,7 @@ import { EventFinancialSection } from "./event-financial-section";
 import { EventLaborSection } from "./event-labor-section";
 import { EventMaterialsSection } from "./event-materials-section";
 import { DuplicateEventButton } from "./duplicate-event-button";
+import { EditEventButton } from "./edit-event-button";
 import { ShoppingListSection } from "./shopping-list-section";
 
 dayjs.locale("pt-br");
@@ -50,16 +51,31 @@ const EventDetailPage = async ({ params }: Props) => {
   return (
     <div className="p-6 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">{event.name}</h1>
-          <Badge variant="secondary">
-            {event.guests} convidado{event.guests !== 1 ? "s" : ""}
-          </Badge>
-          <DuplicateEventButton eventId={eventId} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">{event.name}</h1>
+            <Badge variant="secondary">
+              {event.guests} convidado{event.guests !== 1 ? "s" : ""}
+            </Badge>
+            <DuplicateEventButton eventId={eventId} />
+          </div>
+          <EditEventButton
+            record={{
+              id: event.id,
+              name: event.name,
+              date: event.date.toISOString(),
+              time: event.time,
+              guests: event.guests,
+              durationHours: event.durationHours,
+              avgDrinksPerPerson: Number(event.avgDrinksPerPerson),
+              status: event.status,
+              revenue: Number(event.revenue),
+            }}
+          />
         </div>
         <p className="text-muted-foreground text-sm">
-          {dayjs(event.date).format("dddd, D [de] MMMM [de] YYYY")} ·{" "}
-          {event.durationHours}h de duração
+          {dayjs(event.date).format("dddd, D [de] MMMM [de] YYYY")}
+          {event.time && ` · às ${event.time.replace(":", "h")}`} · {event.durationHours}h de duração
         </p>
       </div>
 

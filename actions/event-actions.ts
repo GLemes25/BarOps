@@ -39,6 +39,7 @@ type RawIngredientTotal = {
 type EventInput = {
   name: string;
   date: string;
+  time?: string | null;
   guests: number;
   durationHours: number;
   avgDrinksPerPerson: number;
@@ -79,6 +80,7 @@ export const createEvent = async (
       .values({
         name: values.name,
         date: new Date(values.date),
+        time: values.time || null,
         guests: values.guests,
         durationHours: values.durationHours,
         avgDrinksPerPerson: String(values.avgDrinksPerPerson),
@@ -105,6 +107,7 @@ export const updateEvent = async (
       .set({
         name: values.name,
         date: new Date(values.date),
+        time: values.time || null,
         guests: values.guests,
         durationHours: values.durationHours,
         avgDrinksPerPerson: String(values.avgDrinksPerPerson),
@@ -424,6 +427,7 @@ export const duplicateEvent = async (
       .values({
         name: `${original.name} copy`,
         date: original.date,
+        time: original.time,
         guests: original.guests,
         durationHours: original.durationHours,
         avgDrinksPerPerson: original.avgDrinksPerPerson,

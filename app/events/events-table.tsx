@@ -28,6 +28,7 @@ type EventRecord = {
   id: number;
   name: string;
   date: string;
+  time?: string | null;
   guests: number;
   durationHours: number;
   avgDrinksPerPerson: number;

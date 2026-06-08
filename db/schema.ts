@@ -13,6 +13,7 @@ export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   date: timestamp("date").notNull(),
+  time: text("time"),
   guests: integer("guests").notNull(),
   durationHours: integer("duration_hours").notNull(),
   avgDrinksPerPerson: decimal("avg_drinks_per_person", {
