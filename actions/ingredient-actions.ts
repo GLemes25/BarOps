@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { ingredientComponents, ingredients } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "./types";
 
@@ -53,7 +53,7 @@ const computeSubRecipeCost = async (
 };
 
 export const getIngredients = async (): Promise<IngredientRecord[]> => {
-  const rows = await db.select().from(ingredients);
+  const rows = await db.select().from(ingredients).orderBy(asc(ingredients.name));
   const compRows = await db.select().from(ingredientComponents);
 
   return rows.map((row) => ({
@@ -70,6 +70,7 @@ export const deleteIngredient = async (id: number): Promise<ActionResult> => {
   try {
     await db.delete(ingredients).where(eq(ingredients.id, id));
     revalidatePath("/ingredients");
+    revalidatePath("/drinks");
     return { success: true };
   } catch (error) {
     return { success: false, error: String(error) };
@@ -113,6 +114,7 @@ export const createIngredient = async (
     }
 
     revalidatePath("/ingredients");
+    revalidatePath("/drinks");
     return { success: true, data: { id: ingredient.id } };
   } catch (error) {
     return { success: false, error: String(error) };
@@ -156,6 +158,7 @@ export const updateIngredient = async (
     }
 
     revalidatePath("/ingredients");
+    revalidatePath("/drinks");
     return { success: true };
   } catch (error) {
     return { success: false, error: String(error) };
