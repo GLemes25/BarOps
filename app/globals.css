@@ -46,11 +46,27 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-event-planning: var(--event-planning);
+  --color-event-planning-fg: var(--event-planning-fg);
+  --color-event-confirmed: var(--event-confirmed);
+  --color-event-confirmed-fg: var(--event-confirmed-fg);
+  --color-event-completed: var(--event-completed);
+  --color-event-completed-fg: var(--event-completed-fg);
+  --color-event-canceled: var(--event-canceled);
+  --color-event-canceled-fg: var(--event-canceled-fg);
 }
 
 :root {
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0.008 326);
+  --event-planning: oklch(0.940 0.003 325.6);
+  --event-planning-fg: oklch(0.420 0.034 322.5);
+  --event-confirmed: oklch(0.920 0.09 155);
+  --event-confirmed-fg: oklch(0.300 0.12 155);
+  --event-completed: oklch(0.900 0.05 235);
+  --event-completed-fg: oklch(0.300 0.08 235);
+  --event-canceled: oklch(0.920 0.06 22);
+  --event-canceled-fg: oklch(0.520 0.20 22);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0.008 326);
   --primary: oklch(0.496 0.265 301.924);
@@ -86,6 +102,14 @@
 .dark {
   --background: oklch(0.145 0.008 326);
   --foreground: oklch(0.985 0 0);
+  --event-planning: oklch(0.250 0.020 320.12);
+  --event-planning-fg: oklch(0.730 0.019 323.02);
+  --event-confirmed: oklch(0.220 0.08 155);
+  --event-confirmed-fg: oklch(0.650 0.15 155);
+  --event-completed: oklch(0.220 0.05 235);
+  --event-completed-fg: oklch(0.650 0.09 235);
+  --event-canceled: oklch(0.300 0.12 22);
+  --event-canceled-fg: oklch(0.700 0.18 22);
   --card: oklch(0.212 0.019 322.12);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.212 0.019 322.12);
@@ -126,5 +150,16 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .ui-surface-dark {
+    background-color: oklch(0.145 0.008 326 / 90%);
+    backdrop-filter: blur(4px);
+  }
+  .ui-surface-light {
+    background-color: oklch(1 0 0 / 90%);
+    backdrop-filter: blur(4px);
   }
 }

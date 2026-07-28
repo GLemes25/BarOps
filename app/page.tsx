@@ -1,4 +1,6 @@
+import { getEvents } from "@/actions/event-actions";
 import { getDashboardStats } from "@/actions/dashboard-actions";
+import { EventsCalendar } from "@/components/events-calendar";
 import {
   Card,
   CardContent,
@@ -9,8 +11,12 @@ import {
 import { CalendarDays, GlassWater, TrendingUp } from "lucide-react";
 
 const DashboardPage = async () => {
-  const result = await getDashboardStats();
-  const stats = result.success && result.data ? result.data : null;
+  const [statsResult, events] = await Promise.all([
+    getDashboardStats(),
+    getEvents(),
+  ]);
+
+  const stats = statsResult.success && statsResult.data ? statsResult.data : null;
 
   const totalEvents = stats?.totalEvents ?? 0;
   const estimatedRevenue = stats?.estimatedRevenue ?? 0;
@@ -21,9 +27,16 @@ const DashboardPage = async () => {
     currency: "BRL",
   }).format(estimatedRevenue);
 
+  const calendarEvents = events.map((e) => ({
+    id: e.id,
+    name: e.name,
+    date: e.date,
+    status: e.status,
+  }));
+
   return (
-    <div className="p-4 sm:p-6 md:p-8">
-      <div className="mb-8">
+    <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-8">
+      <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground mt-1">
           Visão geral das operações do bar.
@@ -78,6 +91,18 @@ const DashboardPage = async () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold">
+            Calendário de Eventos
+          </CardTitle>
+          <CardDescription>Visualize os eventos por período</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EventsCalendar events={calendarEvents} />
+        </CardContent>
+      </Card>
     </div>
   );
 };

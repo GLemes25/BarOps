@@ -41,10 +41,22 @@ const statusConfig: Record<
   EventRecord["status"],
   { label: string; className: string }
 > = {
-  planning: { label: "Planejamento", className: "bg-gray-100 text-gray-700" },
-  confirmed: { label: "Confirmado", className: "bg-green-100 text-green-700" },
-  completed: { label: "Concluído", className: "bg-blue-100 text-blue-700" },
-  canceled: { label: "Cancelado", className: "bg-red-100 text-red-700" },
+  planning: {
+    label: "Planejamento",
+    className: "bg-event-planning text-event-planning-fg",
+  },
+  confirmed: {
+    label: "Confirmado",
+    className: "bg-event-confirmed text-event-confirmed-fg",
+  },
+  completed: {
+    label: "Concluído",
+    className: "bg-event-completed text-event-completed-fg",
+  },
+  canceled: {
+    label: "Cancelado",
+    className: "bg-event-canceled text-event-canceled-fg",
+  },
 };
 
 type Props = {
@@ -117,74 +129,78 @@ export function EventsTable({ initialData }: Props) {
         )}
       />
 
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
+      <Table className="table-fixed w-full">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead className="hidden sm:table-cell w-28">Data</TableHead>
+            <TableHead className="hidden md:table-cell w-24">
+              Convidados
+            </TableHead>
+            <TableHead className="hidden lg:table-cell w-24">Duração</TableHead>
+            <TableHead className="hidden lg:table-cell w-28">
+              Drinks/pessoa
+            </TableHead>
+            <TableHead className="hidden lg:table-cell w-28">
+              Total Drinks
+            </TableHead>
+            <TableHead className="w-32">Status</TableHead>
+            <TableHead className="w-16 text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {events.length === 0 ? (
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead className="whitespace-nowrap">Data</TableHead>
-              <TableHead className="whitespace-nowrap">Convidados</TableHead>
-              <TableHead className="whitespace-nowrap">Duração</TableHead>
-              <TableHead className="whitespace-nowrap">Drinks/pessoa</TableHead>
-              <TableHead className="whitespace-nowrap">Total Drinks</TableHead>
-              <TableHead className="whitespace-nowrap">Status</TableHead>
-              <TableHead className="w-16 whitespace-nowrap">Ações</TableHead>
+              <TableCell
+                colSpan={8}
+                className="text-center text-muted-foreground"
+              >
+                Nenhum evento cadastrado.
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {events.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center text-muted-foreground"
-                >
-                  Nenhum evento cadastrado.
+          ) : (
+            events.map((event) => (
+              <TableRow key={event.id}>
+                <TableCell className="truncate">
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="hover:underline font-medium truncate block"
+                  >
+                    {event.name}
+                  </Link>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {dayjs(event.date).format("DD/MM/YYYY")}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {event.guests}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {event.durationHours}h
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {event.avgDrinksPerPerson}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {event.totalDrinks}
+                </TableCell>
+                <TableCell>
+                  <Badge className={statusConfig[event.status].className}>
+                    {statusConfig[event.status].label}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <TableRowActions
+                    onEdit={() => handleEdit(event)}
+                    onDelete={() => handleDelete(event.id)}
+                    onDuplicate={() => handleDuplicate(event)}
+                  />
                 </TableCell>
               </TableRow>
-            ) : (
-              events.map((event) => (
-                <TableRow key={event.id}>
-                  <TableCell>
-                    <Link
-                      href={`/events/${event.id}`}
-                      className="hover:underline font-medium"
-                    >
-                      {event.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {dayjs(event.date).format("DD/MM/YYYY")}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {event.guests}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {event.durationHours}h
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {event.avgDrinksPerPerson}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {event.totalDrinks}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <Badge className={statusConfig[event.status].className}>
-                      {statusConfig[event.status].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <TableRowActions
-                      onEdit={() => handleEdit(event)}
-                      onDelete={() => handleDelete(event.id)}
-                      onDuplicate={() => handleDuplicate(event)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-106.25 md:max-w-2xl">
